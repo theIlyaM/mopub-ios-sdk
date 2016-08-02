@@ -9,8 +9,11 @@
 
 #import "MPPrivateBannerCustomEventDelegate.h"
 
-@class MPBannerCustomEvent;
+#import "MPBannerCustomEvent.h"
 
 @interface MPBannerCustomEventAdapter : MPBaseBannerAdapter <MPPrivateBannerCustomEventDelegate>
+
+@property (nonatomic, strong) MPBannerCustomEvent *bannerCustomEvent;
+@property (nonatomic, strong) MPAdConfiguration *configuration;
 
 @end

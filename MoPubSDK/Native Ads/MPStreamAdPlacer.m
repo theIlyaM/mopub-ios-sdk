@@ -19,7 +19,6 @@
 #import "MPNativeView.h"
 #import "MPServerAdPositioning.h"
 #import "MPStaticNativeAdRenderer.h"
-#import "MPStreamAdPlacementData.h"
 #import "MPStreamAdPlacer.h"
 
 static NSInteger const kAdInsertionLookAheadAmount = 3;
@@ -33,7 +32,6 @@ static const NSUInteger kIndexPathItemIndex = 1;
 @property (nonatomic, strong) MPNativeAdSource *adSource;
 @property (nonatomic, strong) MPNativePositionSource *positioningSource;
 @property (nonatomic, copy) MPAdPositioning *adPositioning;
-@property (nonatomic, strong) MPStreamAdPlacementData *adPlacementData;
 @property (nonatomic, copy) NSString *adUnitID;
 @property (nonatomic, strong) NSMutableDictionary *sectionCounts;
 @property (nonatomic, strong) NSIndexPath *topConsideredIndexPath;

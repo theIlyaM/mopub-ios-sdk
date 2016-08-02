@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "MPClientAdPositioning.h"
+#import "MPStreamAdPlacementData.h"
 
 @protocol MPStreamAdPlacerDelegate;
 @protocol MPNativeAdRendering;
@@ -47,6 +48,8 @@
  */
 
 @interface MPStreamAdPlacer : NSObject
+
+@property (nonatomic, strong) MPStreamAdPlacementData *adPlacementData;
 
 /**
  * An array of `NSIndexPath` objects representing the positions of items that are currently visible

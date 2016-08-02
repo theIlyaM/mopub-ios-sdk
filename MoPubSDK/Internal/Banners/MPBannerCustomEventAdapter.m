@@ -14,8 +14,6 @@
 
 @interface MPBannerCustomEventAdapter ()
 
-@property (nonatomic, strong) MPBannerCustomEvent *bannerCustomEvent;
-@property (nonatomic, strong) MPAdConfiguration *configuration;
 @property (nonatomic, assign) BOOL hasTrackedImpression;
 @property (nonatomic, assign) BOOL hasTrackedClick;
 
