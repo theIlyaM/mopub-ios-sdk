@@ -26,6 +26,8 @@
 #import "MPMoPubNativeCustomEvent.h"
 #import "MPNativeAdRendererConfiguration.h"
 
+static NSTimeInterval const kAdLoadingTimeOut = 30;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface MPNativeAdRequest () <MPNativeCustomEventDelegate, MPAdServerCommunicatorDelegate>
@@ -57,6 +59,7 @@
 
 - (void)dealloc
 {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self];
     [_communicator cancel];
     [_communicator setDelegate:nil];
     [_nativeCustomEvent setDelegate:nil];
@@ -188,6 +191,7 @@
     }
 
     if (self.nativeCustomEvent) {
+		[self performSelector:@selector(cancelAdLoading) withObject:nil afterDelay:kAdLoadingTimeOut];
         [self.nativeCustomEvent requestAdWithCustomEventInfo:configuration.customEventClassData];
     } else if ([[self.adConfiguration.failoverURL absoluteString] length]) {
         self.loading = NO;
@@ -252,6 +256,10 @@
 
 - (void)nativeCustomEvent:(MPNativeCustomEvent *)event didLoadAd:(MPNativeAd *)adObject
 {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self];
+	if (!self.loading)
+		return;
+	
     // Add the click tracker url from the header to our set.
     if (self.adConfiguration.clickTrackingURL) {
         [adObject.clickTrackerURLs addObject:self.adConfiguration.clickTrackingURL];
@@ -272,6 +280,10 @@
 
 - (void)nativeCustomEvent:(MPNativeCustomEvent *)event didFailToLoadAdWithError:(NSError *)error
 {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self];
+	if (!self.loading)
+		return;
+	
     if ([[self.adConfiguration.failoverURL absoluteString] length]) {
         self.loading = NO;
         [self loadAdWithURL:self.adConfiguration.failoverURL];
@@ -280,5 +292,8 @@
     }
 }
 
+- (void) cancelAdLoading {
+	[self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForNoInventory()];
+}
 
 @end
