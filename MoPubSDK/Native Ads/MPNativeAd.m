@@ -192,6 +192,10 @@
     {
         [self.renderer adViewWillMoveToSuperview:superview];
     }
+	if ([self.adAdapter respondsToSelector:@selector(adViewWillMoveToSuperview:)])
+	{
+		[self.adAdapter adViewWillMoveToSuperview:superview];
+	}
 }
 
 #pragma mark - MPNativeAdAdapterDelegate

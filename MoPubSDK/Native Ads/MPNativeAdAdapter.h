@@ -181,4 +181,6 @@
  */
 - (UIView *)mainMediaView;
 
+- (void)adViewWillMoveToSuperview:(UIView *)superview;
+
 @end
