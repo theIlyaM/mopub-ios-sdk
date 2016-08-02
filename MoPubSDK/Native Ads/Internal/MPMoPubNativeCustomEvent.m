@@ -16,6 +16,8 @@
 
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
 {
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubNativeAdRequested" object:nil];
+
     MPMoPubNativeAdAdapter *adAdapter = [[MPMoPubNativeAdAdapter alloc] initWithAdProperties:[info mutableCopy]];
 
     if (adAdapter.properties) {
@@ -38,6 +40,7 @@
                 MPLogDebug(@"%@", errors);
                 [self.delegate nativeCustomEvent:self didFailToLoadAdWithError:MPNativeAdNSErrorForImageDownloadFailure()];
             } else {
+				[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubNativeAdLoaded" object:nil];
                 [self.delegate nativeCustomEvent:self didLoadAd:interfaceAd];
             }
         }];

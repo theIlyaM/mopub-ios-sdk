@@ -293,6 +293,7 @@ static NSTimeInterval const kAdLoadingTimeOut = 30;
 }
 
 - (void) cancelAdLoading {
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubNativeAdLoadingTimeout" object:self.nativeCustomEvent];
 	[self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForNoInventory()];
 }
 
