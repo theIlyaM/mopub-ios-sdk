@@ -100,6 +100,7 @@
         return;
     }
 
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"bannerAdLoadingBegan" object:nil];
     [self loadAdWithURL:nil];
 }
 
