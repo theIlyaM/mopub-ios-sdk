@@ -28,7 +28,7 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubHTMLBannerAdRequested" object:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMoPubHTMLBannerAdRequested" object:nil];
 	
     MPLogInfo(@"Loading MoPub HTML banner");
     MPLogTrace(@"Loading banner with HTML source: %@", [[self.delegate configuration] adResponseHTMLString]);
@@ -68,7 +68,7 @@
 
 - (void)adDidFinishLoadingAd:(MPAdWebView *)ad
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubHTMLBannerAdLoaded" object:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMoPubHTMLBannerAdLoaded" object:nil];
 	
     MPLogInfo(@"MoPub HTML banner did load");
     [self.delegate bannerCustomEvent:self didLoadAd:ad];
