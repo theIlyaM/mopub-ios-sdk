@@ -12,7 +12,7 @@
 #import "MPNativeAdConstants.h"
 #import "MPGlobal.h"
 
-static const NSTimeInterval kMoPubRequiredSecondsForImpression = 1.0;
+static const NSTimeInterval kMoPubRequiredSecondsForImpression = 0.0;
 static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
 
 @interface MPMoPubNativeAdAdapter () <MPAdDestinationDisplayAgentDelegate, MPStaticNativeAdImpressionTimerDelegate>
