@@ -21,6 +21,8 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info
 {
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMoPubMRAIDBannerAdRequested" object:nil];
+	
     MPLogInfo(@"Loading MoPub MRAID banner");
     MPAdConfiguration *configuration = [self.delegate configuration];
 
@@ -58,6 +60,8 @@
 
 - (void)adDidLoad:(UIView *)adView
 {
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMoPubMRAIDBannerAdLoaded" object:nil];
+	
     MPLogInfo(@"MoPub MRAID banner did load");
     [self.delegate bannerCustomEvent:self didLoadAd:adView];
 }
