@@ -11,7 +11,7 @@
 #import "MPGlobal.h"
 #import "MPNativeAdConstants.h"
 
-static const CGFloat kImpressionTimerInterval = 0.25;
+static const CGFloat kImpressionTimerInterval = 0.1;
 static const NSTimeInterval kFirstVisibilityTimestampNone = -1;
 
 @interface MPStaticNativeAdImpressionTimer ()
