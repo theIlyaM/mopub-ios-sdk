@@ -96,6 +96,8 @@
 
 - (void)timeout
 {
+	if ([self respondsToSelector:@selector(bannerCustomEvent)])
+		[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubBannerAdLoadingTimeout" object:[self performSelector:@selector(bannerCustomEvent)]];
     [self.delegate adapter:self didFailToLoadAdWithError:nil];
 }
 

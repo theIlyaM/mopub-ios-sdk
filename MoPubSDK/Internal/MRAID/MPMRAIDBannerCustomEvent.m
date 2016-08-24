@@ -14,6 +14,7 @@
 @interface MPMRAIDBannerCustomEvent () <MRControllerDelegate>
 
 @property (nonatomic, strong) MRController *mraidController;
+@property (nonatomic, strong) NSString *tierName;
 
 @end
 
@@ -21,7 +22,8 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMoPubMRAIDBannerAdRequested" object:nil];
+	self.tierName = [info objectForKey:@"name"];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubMRAIDBannerAdRequested" object:self.tierName];
 	
     MPLogInfo(@"Loading MoPub MRAID banner");
     MPAdConfiguration *configuration = [self.delegate configuration];
@@ -60,7 +62,7 @@
 
 - (void)adDidLoad:(UIView *)adView
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMoPubMRAIDBannerAdLoaded" object:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubMRAIDBannerAdLoaded" object:self.tierName];
 	
     MPLogInfo(@"MoPub MRAID banner did load");
     [self.delegate bannerCustomEvent:self didLoadAd:adView];
