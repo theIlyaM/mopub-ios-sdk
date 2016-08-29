@@ -11,7 +11,9 @@
 #import "MPAdConfiguration.h"
 #import "MPInstanceProvider.h"
 
-@interface MPHTMLBannerCustomEvent ()
+@interface MPHTMLBannerCustomEvent () {
+	NSTimeInterval loadingBeganTime;
+}
 
 @property (nonatomic, strong) MPAdWebViewAgent *bannerAgent;
 @property (nonatomic, strong) NSString *tierName;
@@ -29,8 +31,8 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info
 {
-	self.tierName = [info objectForKey:@"name"];
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubHTMLBannerAdRequested" object:self.tierName];
+	self.tierName = [info objectForKey:@"name"] ? : bannerAdNetworkMoPubHTML;
+	loadingBeganTime = [[NSDate date] timeIntervalSince1970];
 	
     MPLogInfo(@"Loading MoPub HTML banner");
     MPLogTrace(@"Loading banner with HTML source: %@", [[self.delegate configuration] adResponseHTMLString]);
@@ -70,7 +72,12 @@
 
 - (void)adDidFinishLoadingAd:(MPAdWebView *)ad
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubHTMLBannerAdLoaded" object:self.tierName];
+	if (self.tierName && loadingBeganTime) {
+		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdRequestSuccessNotification object:
+		 @{adNotificationParamsName:self.tierName,
+		   adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
+	}
 	
     MPLogInfo(@"MoPub HTML banner did load");
     [self.delegate bannerCustomEvent:self didLoadAd:ad];
@@ -78,6 +85,13 @@
 
 - (void)adDidFailToLoadAd:(MPAdWebView *)ad
 {
+	if (self.tierName && loadingBeganTime) {
+		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdRequestFailedNotification object:
+		 @{adNotificationParamsName:self.tierName,
+		   adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
+	}
+	
     MPLogInfo(@"MoPub HTML banner did fail");
     [self.delegate bannerCustomEvent:self didFailToLoadAdWithError:nil];
 }

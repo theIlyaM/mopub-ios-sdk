@@ -26,7 +26,7 @@
 #import "MPMoPubNativeCustomEvent.h"
 #import "MPNativeAdRendererConfiguration.h"
 
-static NSTimeInterval const kAdLoadingTimeOut = 30;
+static NSTimeInterval const kAdLoadingTimeOut = 10;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -293,7 +293,13 @@ static NSTimeInterval const kAdLoadingTimeOut = 30;
 }
 
 - (void) cancelAdLoading {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubNativeAdLoadingTimeout" object:self.nativeCustomEvent];
+	
+	if (self.nativeCustomEvent) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdTimeoutNotification object:
+		 @{adNotificationParamsTime:[NSNumber numberWithDouble:kAdLoadingTimeOut],
+		   adNotificationParamsCustomEvent:self.nativeCustomEvent}];
+	}
+	
 	[self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForNoInventory()];
 }
 

@@ -12,14 +12,23 @@
 #import "MPLogging.h"
 #import "MPNativeAdUtils.h"
 
+@interface MPMoPubNativeCustomEvent ()
+
+@property (nonatomic, strong) NSString *tierName;
+
+@end
+
 @implementation MPMoPubNativeCustomEvent
 
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubNativeAdRequested" object:nil];
+	self.tierName = [info objectForKey:@"name"] ? : nativeAdNetworkMoPub;
+	[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdRequestBeganNotification object:
+	 @{adNotificationParamsName:self.tierName}];
 
     MPMoPubNativeAdAdapter *adAdapter = [[MPMoPubNativeAdAdapter alloc] initWithAdProperties:[info mutableCopy]];
-
+	adAdapter.tierName = self.tierName;
+	
     if (adAdapter.properties) {
         MPNativeAd *interfaceAd = [[MPNativeAd alloc] initWithAdAdapter:adAdapter];
         [interfaceAd.impressionTrackerURLs addObjectsFromArray:adAdapter.impressionTrackerURLs];
@@ -40,7 +49,9 @@
                 MPLogDebug(@"%@", errors);
                 [self.delegate nativeCustomEvent:self didFailToLoadAdWithError:MPNativeAdNSErrorForImageDownloadFailure()];
             } else {
-				[[NSNotificationCenter defaultCenter] postNotificationName:@"trackMopubNativeAdLoaded" object:nil];
+				if (self.tierName)
+					[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdRequestSuccessNotification object:
+					 @{adNotificationParamsName:self.tierName}];
                 [self.delegate nativeCustomEvent:self didLoadAd:interfaceAd];
             }
         }];
