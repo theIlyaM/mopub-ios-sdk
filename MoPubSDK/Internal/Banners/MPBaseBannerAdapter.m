@@ -96,15 +96,6 @@
 
 - (void)timeout
 {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-	if ([self respondsToSelector:@selector(bannerCustomEvent)]) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdTimeoutNotification object:
-		 @{adNotificationParamsTime:[NSNumber numberWithDouble:BANNER_TIMEOUT_INTERVAL],
-		   adNotificationParamsCustomEvent:[self performSelector:@selector(bannerCustomEvent)]}];
-	}
-#pragma clang diagnostic pop
-	
     [self.delegate adapter:self didFailToLoadAdWithError:nil];
 }
 

@@ -11,12 +11,9 @@
 #import "MPInstanceProvider.h"
 #import "MRController.h"
 
-@interface MPMRAIDBannerCustomEvent () <MRControllerDelegate> {
-	NSTimeInterval loadingBeganTime;
-}
+@interface MPMRAIDBannerCustomEvent () <MRControllerDelegate>
 
 @property (nonatomic, strong) MRController *mraidController;
-@property (nonatomic, strong) NSString *tierName;
 
 @end
 
@@ -24,9 +21,6 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info
 {
-	self.tierName = [info objectForKey:@"name"] ? : bannerAdNetworkMoPubMRAID;
-	loadingBeganTime = [[NSDate date] timeIntervalSince1970];
-	
     MPLogInfo(@"Loading MoPub MRAID banner");
     MPAdConfiguration *configuration = [self.delegate configuration];
 
@@ -64,26 +58,12 @@
 
 - (void)adDidLoad:(UIView *)adView
 {
-	if (self.tierName && loadingBeganTime) {
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdRequestSuccessNotification object:
-		 @{adNotificationParamsName:self.tierName,
-		   adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
-	}
-	
     MPLogInfo(@"MoPub MRAID banner did load");
     [self.delegate bannerCustomEvent:self didLoadAd:adView];
 }
 
 - (void)adDidFailToLoad:(UIView *)adView
 {
-	if (self.tierName && loadingBeganTime) {
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdRequestFailedNotification object:
-		 @{adNotificationParamsName:self.tierName,
-		   adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
-	}
-	
     MPLogInfo(@"MoPub MRAID banner did fail");
     [self.delegate bannerCustomEvent:self didFailToLoadAdWithError:nil];
 }

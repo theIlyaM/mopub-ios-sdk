@@ -11,12 +11,9 @@
 #import "MPAdConfiguration.h"
 #import "MPInstanceProvider.h"
 
-@interface MPHTMLBannerCustomEvent () {
-	NSTimeInterval loadingBeganTime;
-}
+@interface MPHTMLBannerCustomEvent ()
 
 @property (nonatomic, strong) MPAdWebViewAgent *bannerAgent;
-@property (nonatomic, strong) NSString *tierName;
 
 @end
 
@@ -31,9 +28,6 @@
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info
 {
-	self.tierName = [info objectForKey:@"name"] ? : bannerAdNetworkMoPubHTML;
-	loadingBeganTime = [[NSDate date] timeIntervalSince1970];
-	
     MPLogInfo(@"Loading MoPub HTML banner");
     MPLogTrace(@"Loading banner with HTML source: %@", [[self.delegate configuration] adResponseHTMLString]);
 
@@ -72,26 +66,12 @@
 
 - (void)adDidFinishLoadingAd:(MPAdWebView *)ad
 {
-	if (self.tierName && loadingBeganTime) {
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdRequestSuccessNotification object:
-		 @{adNotificationParamsName:self.tierName,
-		   adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
-	}
-	
     MPLogInfo(@"MoPub HTML banner did load");
     [self.delegate bannerCustomEvent:self didLoadAd:ad];
 }
 
 - (void)adDidFailToLoadAd:(MPAdWebView *)ad
 {
-	if (self.tierName && loadingBeganTime) {
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdRequestFailedNotification object:
-		 @{adNotificationParamsName:self.tierName,
-		   adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
-	}
-	
     MPLogInfo(@"MoPub HTML banner did fail");
     [self.delegate bannerCustomEvent:self didFailToLoadAdWithError:nil];
 }

@@ -38,6 +38,7 @@
 #import "MPRewardedVideoAdManager.h"
 #import "MPRewardedVideoAdapter.h"
 #import "MPRewardedVideoCustomEvent.h"
+#import "FCBannerCustomEventAdapter.h"
 
 @interface MPInstanceProvider ()
 
@@ -113,7 +114,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
                                                    delegate:(id<MPBannerAdapterDelegate>)delegate
 {
     if (configuration.customEventClass) {
-        return [(MPBannerCustomEventAdapter *)[MPBannerCustomEventAdapter alloc] initWithDelegate:delegate];
+        return [(MPBannerCustomEventAdapter *)[FCBannerCustomEventAdapter alloc] initWithDelegate:delegate];
     }
 
     return nil;
