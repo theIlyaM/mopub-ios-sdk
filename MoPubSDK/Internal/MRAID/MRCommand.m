@@ -345,8 +345,10 @@
 
 - (BOOL)executeWithParams:(NSDictionary *)params
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     [self.delegate mrCommand:self createCalendarEventWithParams:params];
-
+#pragma GCC diagnostic pop
     return YES;
 }
 
@@ -397,8 +399,10 @@
 
 - (BOOL)executeWithParams:(NSDictionary *)params
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     [self.delegate mrCommand:self storePictureWithURL:[self urlFromParameters:params forKey:@"uri"]];
-
+#pragma GCC diagnostic pop
     return YES;
 }
 
