@@ -13,6 +13,7 @@
 @property (nonatomic, readonly) NSArray *impressionTrackerURLs;
 @property (nonatomic, readonly) NSArray *clickTrackerURLs;
 @property (nonatomic) MPAdConfiguration *adConfiguration;
+@property (nonatomic, strong) NSString *tierName;
 
 - (instancetype)initWithAdProperties:(NSMutableDictionary *)properties;
 

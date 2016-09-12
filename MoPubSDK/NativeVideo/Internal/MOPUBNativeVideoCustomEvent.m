@@ -16,6 +16,13 @@
 #import "MPVideoConfig.h"
 #import "MPVASTManager.h"
 #import "MPNativeAd+Internal.h"
+#import "FCNativeAd.h"
+
+@interface MOPUBNativeVideoCustomEvent ()
+
+@property (nonatomic, strong) NSString *tierName;
+
+@end
 
 @implementation MOPUBNativeVideoCustomEvent
 
@@ -24,8 +31,9 @@
     NSMutableDictionary *infoMutableCopy = [info mutableCopy];
     [infoMutableCopy setObject:[[MPVideoConfig alloc] initWithVASTResponse:mpVastResponse] forKey:kVideoConfigKey];
     MOPUBNativeVideoAdAdapter *adAdapter = [[MOPUBNativeVideoAdAdapter alloc] initWithAdProperties:infoMutableCopy];
+	adAdapter.tierName = self.tierName;
     if (adAdapter.properties) {
-        MPNativeAd *interfaceAd = [[MPNativeAd alloc] initWithAdAdapter:adAdapter];
+        MPNativeAd *interfaceAd = [[FCNativeAd alloc] initWithAdAdapter:adAdapter];
         [interfaceAd.impressionTrackerURLs addObjectsFromArray:adAdapter.impressionTrackerURLs];
         [interfaceAd.clickTrackerURLs addObjectsFromArray:adAdapter.clickTrackerURLs];
         // Get the image urls so we can download them prior to returning the ad.
@@ -53,6 +61,8 @@
 
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
 {
+	self.tierName = [info objectForKey:@"name"] ? : nativeAdNetworkMoPub;
+
     MOPUBNativeVideoAdConfigValues *nativeVideoAdConfigValues = [info objectForKey:kNativeVideoAdConfigKey];
     if (nativeVideoAdConfigValues && [nativeVideoAdConfigValues isValid]) {
         NSString *vastString = [info objectForKey:kVASTVideoKey];

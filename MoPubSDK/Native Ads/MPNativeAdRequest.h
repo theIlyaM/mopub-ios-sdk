@@ -4,6 +4,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MPAdConfiguration.h"
+#import "MPNativeCustomEvent.h"
 
 @class MPNativeAd;
 @class MPNativeAdRequest;
@@ -24,7 +26,7 @@ typedef void(^MPNativeAdRequestHandler)(MPNativeAdRequest *request,
  * `MPCollectionViewAdPlacer` to display ads, there should be no need for you to use this class.
  */
 
-@interface MPNativeAdRequest : NSObject
+@interface MPNativeAdRequest : NSObject <MPNativeCustomEventDelegate>
 
 /** @name Targeting Information */
 
@@ -56,5 +58,11 @@ typedef void(^MPNativeAdRequestHandler)(MPNativeAdRequest *request,
  * request itself and either a valid MPNativeAd or an NSError object indicating failure.
  */
 - (void)startWithCompletionHandler:(MPNativeAdRequestHandler)handler;
+
+
+@property (nonatomic, strong) MPNativeCustomEvent *nativeCustomEvent;
+@property (nonatomic, assign) BOOL loading;
+@property (nonatomic, strong) MPAdConfiguration *adConfiguration;
+- (void)getAdWithConfiguration:(MPAdConfiguration *)configuration;
 
 @end

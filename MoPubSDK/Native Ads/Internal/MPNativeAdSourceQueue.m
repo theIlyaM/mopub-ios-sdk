@@ -11,6 +11,7 @@
 #import "MPNativeAdRequest+MPNativeAdSource.h"
 #import "MPLogging.h"
 #import "MPNativeAdError.h"
+#import "FCNativeAdRequest.h"
 
 static NSUInteger const kCacheSizeLimit = 1;
 static NSTimeInterval const kAdFetchRetryTimes[] = {1, 3, 5, 25, 60, 300};
@@ -114,7 +115,7 @@ static NSUInteger const kMaxRetries = sizeof(kAdFetchRetryTimes)/sizeof(kAdFetch
 
     self.isAdLoading = YES;
 
-    MPNativeAdRequest *adRequest = [MPNativeAdRequest requestWithAdUnitIdentifier:self.adUnitIdentifier rendererConfigurations:self.rendererConfigurations];
+    FCNativeAdRequest *adRequest = [FCNativeAdRequest requestWithAdUnitIdentifier:self.adUnitIdentifier rendererConfigurations:self.rendererConfigurations];
     adRequest.targeting = self.targeting;
 
     [adRequest startForAdSequence:self.currentSequence withCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {

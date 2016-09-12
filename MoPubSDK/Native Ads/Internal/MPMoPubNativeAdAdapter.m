@@ -126,11 +126,7 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
 
 - (void)trackImpression
 {
-	if (self.tierName)
-		[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdImpressionHandledNotification object:
-		 @{adNotificationParamsName:self.tierName}];
-	
-    [self.delegate nativeAdWillLogImpression:self];
+	[self.delegate nativeAdWillLogImpression:self];
 }
 
 #pragma mark - <MPAdDestinationDisplayAgentDelegate>

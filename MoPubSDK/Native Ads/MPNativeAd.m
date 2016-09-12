@@ -22,7 +22,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface MPNativeAd () <MPNativeAdAdapterDelegate, MPNativeViewDelegate>
+@interface MPNativeAd () <MPNativeViewDelegate>
 
 @property (nonatomic, readwrite, strong) id<MPNativeAdRenderer> renderer;
 

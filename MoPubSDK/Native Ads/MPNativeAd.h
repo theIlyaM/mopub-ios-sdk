@@ -5,6 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "MPNativeAdAdapter.h"
 
 @protocol MPNativeAdAdapter;
 @protocol MPNativeAdDelegate;
@@ -17,7 +18,7 @@
  * convenience methods for URL navigation and metrics-gathering.
  */
 
-@interface MPNativeAd : NSObject
+@interface MPNativeAd : NSObject <MPNativeAdAdapterDelegate>
 
 /** @name Ad Resources */
 
