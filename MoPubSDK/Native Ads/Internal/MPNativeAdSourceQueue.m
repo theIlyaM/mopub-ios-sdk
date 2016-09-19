@@ -115,7 +115,7 @@ static NSUInteger const kMaxRetries = sizeof(kAdFetchRetryTimes)/sizeof(kAdFetch
 
     self.isAdLoading = YES;
 
-    FCNativeAdRequest *adRequest = [FCNativeAdRequest requestWithAdUnitIdentifier:self.adUnitIdentifier rendererConfigurations:self.rendererConfigurations];
+    MPNativeAdRequest *adRequest = [FCNativeAdRequest requestWithAdUnitIdentifier:self.adUnitIdentifier rendererConfigurations:self.rendererConfigurations];
     adRequest.targeting = self.targeting;
 
     [adRequest startForAdSequence:self.currentSequence withCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
