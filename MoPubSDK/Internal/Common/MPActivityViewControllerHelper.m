@@ -76,8 +76,7 @@
             [[MPActivityItemProviderWithSubject alloc] initWithSubject:subject body:body];
         UIActivityViewController *activityViewController =
             [[UIActivityViewController alloc] initWithActivityItems:@[activityItemProvider] applicationActivities:nil];
-        activityViewController.completionHandler = ^
-            (NSString* activityType, BOOL completed) {
+        activityViewController.completionWithItemsHandler =  ^(UIActivityType __nullable activityType, BOOL completed, NSArray * __nullable returnedItems, NSError * __nullable activityError) {
                 if ([self.delegate respondsToSelector:@selector(activityViewControllerDidDismiss)]) {
                     [self.delegate activityViewControllerDidDismiss];
                 }
