@@ -187,6 +187,9 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
     if (self.actionSheet) {
         [self dismissActionSheet];
     } else {
+		if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) {
+			[[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerPermittedAlertWillAppear object:nil];
+		}
         self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
                                                        delegate:self
                                               cancelButtonTitle:@"Cancel"
