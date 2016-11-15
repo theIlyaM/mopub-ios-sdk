@@ -24,7 +24,7 @@ The MoPub SDK is distributed as source code that you can include in your applica
 
   Includes everything you need to serve HTML and MRAID advertisements.  Third party ad networks and Native MoPub advertisements are not included.
 
-The current version of the SDK is 4.9.1
+The current version of the SDK is 4.11.0
 
 ## Integrate
 
@@ -36,10 +36,10 @@ More detailed class documentation is available in the repo under the `ClassDocum
 
 Please view the [changelog](https://github.com/mopub/mopub-ios-sdk/blob/master/CHANGELOG.md) for details.
 
-- **iOS 10 compatibility updates**
-	- Fixed an issue related to screen bounds calculation
-- **Removed EventKit, EventKitUI frameworks and a few files related to EventKit and MRAID image downloader**
-	- Please completely remove the MoPub SDK from your project and re-integrate this version to ensure that files are properly removed from your project
+- **The MoPub SDK now uses WKWebView to display ads when possible. Backwards compatibility for old OS versions is retained using UIWebView.**
+- **Native video start tracker now fires immediately upon successful video playback.**
+- **Bug fixes**
+  - Native ads and native video ads now correctly fire impression trackers while scrolling.
 
 
 ### IMPORTANT 4.0 UPGRADE INSTRUCTIONS
