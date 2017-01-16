@@ -115,11 +115,15 @@ static NSUInteger const kMaxRetries = sizeof(kAdFetchRetryTimes)/sizeof(kAdFetch
 
     self.isAdLoading = YES;
 
+	[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdAttemptBeganNotification object:nil];
+	
     MPNativeAdRequest *adRequest = [FCNativeAdRequest requestWithAdUnitIdentifier:self.adUnitIdentifier rendererConfigurations:self.rendererConfigurations];
     adRequest.targeting = self.targeting;
 
     [adRequest startForAdSequence:self.currentSequence withCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
         if (response && !error) {
+			[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdAttemptSuccessNotification object:nil];
+			
             self.adFetchRetryCounter = 0;
 
             [self addNativeAd:response];
@@ -128,6 +132,8 @@ static NSUInteger const kMaxRetries = sizeof(kAdFetchRetryTimes)/sizeof(kAdFetch
                 [self.delegate adSourceQueueAdIsAvailable:self];
             }
         } else {
+			[[NSNotificationCenter defaultCenter] postNotificationName:nativeAdAttemptFailedNotification object:nil];
+			
             MPLogDebug(@"%@", error);
             //increment in this failure case to prevent retrying a request that wasn't bid on.
             //currently under discussion on whether we do this or not.
