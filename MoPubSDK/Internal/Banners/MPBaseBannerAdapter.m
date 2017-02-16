@@ -81,8 +81,7 @@
 
 - (void)startTimeoutTimer
 {
-    NSTimeInterval timeInterval = (self.configuration && self.configuration.adTimeoutInterval >= 0) ?
-    self.configuration.adTimeoutInterval : BANNER_TIMEOUT_INTERVAL;
+    NSTimeInterval timeInterval = BANNER_TIMEOUT_INTERVAL;
 
     if (timeInterval > 0) {
         self.timeoutTimer = [[MPCoreInstanceProvider sharedProvider] buildMPTimerWithTimeInterval:timeInterval

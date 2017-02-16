@@ -25,7 +25,7 @@ extern CGSize const MOPUB_WIDE_SKYSCRAPER_SIZE;
 // Miscellaneous constants.
 #define MINIMUM_REFRESH_INTERVAL            10.0
 #define DEFAULT_BANNER_REFRESH_INTERVAL     60
-#define BANNER_TIMEOUT_INTERVAL             10
+#define BANNER_TIMEOUT_INTERVAL             5.0
 #define INTERSTITIAL_TIMEOUT_INTERVAL       30
 #define REWARDED_VIDEO_TIMEOUT_INTERVAL     30
 
