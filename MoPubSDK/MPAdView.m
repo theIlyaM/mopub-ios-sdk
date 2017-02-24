@@ -147,14 +147,14 @@
     [self setAdContentView:nil];
 }
 
-- (void)managerDidFailToLoadAd
+- (void)managerDidFailToLoadAdWithError:(NSError *)error
 {
-    if ([self.delegate respondsToSelector:@selector(adViewDidFailToLoadAd:)]) {
+	if ([self.delegate respondsToSelector:@selector(adView:didFailToLoadAdWithError:)]) {
         // make sure we are not released synchronously as objects owned by us
         // may do additional work after this callback
         [[MPCoreInstanceProvider sharedProvider] keepObjectAliveForCurrentRunLoopIteration:self];
 
-        [self.delegate adViewDidFailToLoadAd:self];
+        [self.delegate adView:self didFailToLoadAdWithError:error];
     }
 }
 

@@ -35,7 +35,9 @@
 
 @end
 
-@implementation MPBannerAdManager
+@implementation MPBannerAdManager {
+	NSTimeInterval loadingBeganTime;
+}
 
 @synthesize delegate = _delegate;
 @synthesize communicator = _communicator;
@@ -100,7 +102,7 @@
         return;
     }
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptBeganNotification object:nil];
+	loadingBeganTime = [[NSDate date] timeIntervalSince1970];
     [self loadAdWithURL:nil];
 }
 
@@ -246,7 +248,12 @@
 
 - (void)didFailToLoadAdapterWithError:(NSError *)error
 {
-    [self.delegate managerDidFailToLoadAd];
+    [self.delegate managerDidFailToLoadAdWithError:error];
+	NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+	[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
+			@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
+			  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
+	
     [self scheduleRefreshTimer];
 
     MPLogError(@"Banner view (%@) failed. Error: %@", [self.delegate adUnitId], error);
@@ -293,6 +300,10 @@
 
         [self.onscreenAdapter rotateToOrientation:self.currentOrientation];
         [self.delegate managerDidLoadAd:self.requestingAdapterAdContentView];
+		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptSuccessNotification object:
+		 		@{adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
+		
         [self.onscreenAdapter didDisplayAd];
 
         self.requestingAdapterAdContentView = nil;
@@ -319,7 +330,12 @@
         // 1) remove it
         // 2) tell the delegate
         // 3) and note that there can't possibly be a modal on display any more
-        [self.delegate managerDidFailToLoadAd];
+        [self.delegate managerDidFailToLoadAdWithError:error];
+		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
+			@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
+			  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
+		
         [self.delegate invalidateContentView];
         [self.onscreenAdapter unregisterDelegate];
         self.onscreenAdapter = nil;

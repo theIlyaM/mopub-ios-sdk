@@ -257,7 +257,7 @@ typedef enum
  *
  * @param view The ad view sending the message.
  */
-- (void)adViewDidFailToLoadAd:(MPAdView *)view;
+- (void)adView:(MPAdView *)view didFailToLoadAdWithError:(NSError *)error;
 
 /** @name Detecting When a User Interacts With the Ad View */
 
