@@ -14,6 +14,7 @@
 #import "MPTimer.h"
 #import "MPConstants.h"
 #import "MPLogging.h"
+#import "MPBannerCustomEvent.h"
 
 @interface MPBannerAdManager ()
 
@@ -249,10 +250,14 @@
 - (void)didFailToLoadAdapterWithError:(NSError *)error
 {
     [self.delegate managerDidFailToLoadAdWithError:error];
-	NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-	[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
-			@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
-			  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
+	
+	NSObject *viewDelegate = [(NSObject *)self.delegate valueForKey:@"_delegate"];
+	if (![viewDelegate isKindOfClass:[MPBannerCustomEvent class]]) {
+		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
+				@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
+				  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
+	}
 	
     [self scheduleRefreshTimer];
 
@@ -300,9 +305,13 @@
 
         [self.onscreenAdapter rotateToOrientation:self.currentOrientation];
         [self.delegate managerDidLoadAd:self.requestingAdapterAdContentView];
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptSuccessNotification object:
-		 		@{adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
+		
+		NSObject *viewDelegate = [(NSObject *)self.delegate valueForKey:@"_delegate"];
+		if (![viewDelegate isKindOfClass:[MPBannerCustomEvent class]]) {
+			NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+			[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptSuccessNotification object:
+					@{adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
+		}
 		
         [self.onscreenAdapter didDisplayAd];
 
@@ -331,10 +340,14 @@
         // 2) tell the delegate
         // 3) and note that there can't possibly be a modal on display any more
         [self.delegate managerDidFailToLoadAdWithError:error];
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
-			@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
-			  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
+		
+		NSObject *viewDelegate = [(NSObject *)self.delegate valueForKey:@"_delegate"];
+		if (![viewDelegate isKindOfClass:[MPBannerCustomEvent class]]) {
+			NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
+			[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
+				@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
+				  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
+		}
 		
         [self.delegate invalidateContentView];
         [self.onscreenAdapter unregisterDelegate];
