@@ -14,6 +14,7 @@
 #import "MPCoreInstanceProvider.h"
 #import "MPAnalyticsTracker.h"
 #import "MPTimer.h"
+#import "MoPub.h"
 
 @interface MPBaseBannerAdapter ()
 
@@ -81,7 +82,7 @@
 
 - (void)startTimeoutTimer
 {
-    NSTimeInterval timeInterval = BANNER_TIMEOUT_INTERVAL;
+	NSTimeInterval timeInterval = [MoPub sharedInstance].banner_ad_timeout > 0 ? [MoPub sharedInstance].banner_ad_timeout : BANNER_TIMEOUT_INTERVAL;
 
     if (timeInterval > 0) {
         self.timeoutTimer = [[MPCoreInstanceProvider sharedProvider] buildMPTimerWithTimeInterval:timeInterval

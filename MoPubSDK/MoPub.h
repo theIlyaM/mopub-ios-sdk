@@ -127,4 +127,7 @@
 - (NSString *)version;
 - (NSString *)bundleIdentifier;
 
+@property (nonatomic) float banner_ad_timeout;
+@property (nonatomic) float native_ad_timeout;
+
 @end
