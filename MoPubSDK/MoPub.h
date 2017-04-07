@@ -130,4 +130,6 @@
 @property (nonatomic) float banner_ad_timeout;
 @property (nonatomic) float native_ad_timeout;
 
+@property (nonatomic) BOOL ad_view_tapped;
+
 @end

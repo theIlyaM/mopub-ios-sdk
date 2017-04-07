@@ -12,6 +12,7 @@
 #import "NSURL+MPAdditions.h"
 #import "MPCoreInstanceProvider.h"
 #import "MPAnalyticsTracker.h"
+#import "MoPub.h"
 
 static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
@@ -79,6 +80,8 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 - (void)displayDestinationForURL:(NSURL *)URL
 {
+	if (![MoPub sharedInstance].ad_view_tapped) return;
+	
     if (self.isLoadingDestination) return;
     self.isLoadingDestination = YES;
 
