@@ -80,7 +80,10 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 - (void)displayDestinationForURL:(NSURL *)URL
 {
-	if (![MoPub sharedInstance].ad_view_tapped) return;
+	if (![MoPub sharedInstance].ad_view_tapped) {
+		NSLog(@"Popup have been blocked. URL - %@", [URL absoluteString]);
+		return;
+	}
 	
     if (self.isLoadingDestination) return;
     self.isLoadingDestination = YES;
