@@ -81,14 +81,12 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 - (void)displayDestinationForURL:(NSURL *)URL
 {
 	if (![MoPub sharedInstance].ad_view_tapped && [MoPub sharedInstance].shouldBlockPopup) {
-        if ([MoPub sharedInstance].shouldLogBlockPopup) {
-            NSDictionary *notificationObject = nil;
-            if (URL.absoluteString) {
-                notificationObject = @{exceptionManagerPopupBlockedURL: URL.absoluteString};
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerPopupBlockedNotification
-                                                                object:notificationObject];
+        NSDictionary *notificationObject = nil;
+        if (URL.absoluteString) {
+            notificationObject = @{exceptionManagerPopupBlockedURL: URL.absoluteString};
         }
+        [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerPopupBlockedNotification
+                                                            object:notificationObject];
 		return;
 	}
 	
