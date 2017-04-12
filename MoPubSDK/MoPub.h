@@ -132,4 +132,7 @@
 
 @property (nonatomic) BOOL ad_view_tapped;
 
+@property (nonatomic) BOOL shouldBlockPopup;
+@property (nonatomic) BOOL shouldLogBlockPopup;
+
 @end

@@ -20,6 +20,7 @@
 #import "NSURL+MPAdditions.h"
 #import "MPInternalUtils.h"
 #import "MPAPIEndPoints.h"
+#import "MoPub.h"
 
 #ifndef NSFoundationVersionNumber_iOS_6_1
 #define NSFoundationVersionNumber_iOS_6_1 993.00
@@ -40,6 +41,9 @@
 - (void)performActionForMoPubSpecificURL:(NSURL *)URL;
 - (BOOL)shouldIntercept:(NSURL *)URL navigationType:(UIWebViewNavigationType)navigationType;
 - (void)interceptURL:(NSURL *)URL;
+
+@property (nonatomic, strong) NSString *htmlString;
+@property (nonatomic, strong) NSString *tierName;
 
 @end
 
@@ -144,6 +148,11 @@
     [self.view mp_setScrollable:configuration.scrollable];
     [self.view disableJavaScriptDialogs];
 
+    if ([MoPub sharedInstance].shouldLogBlockPopup) {
+        self.tierName = [configuration.customEventClassData objectForKey:@"name"];
+        self.htmlString = [configuration adResponseHTMLString];
+    }
+    
     [self.view loadHTMLString:[configuration adResponseHTMLString]
                       baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]
      ];
@@ -217,6 +226,20 @@
         [self performActionForMoPubSpecificURL:URL];
         return NO;
     } else if ([self shouldIntercept:URL navigationType:navigationType]) {
+        if (!self.userInteractedWithWebView &&
+            navigationType == UIWebViewNavigationTypeLinkClicked &&
+            [MoPub sharedInstance].shouldLogBlockPopup) {
+            
+            NSMutableDictionary *notificationObject = [NSMutableDictionary new];
+            if (self.htmlString) {
+                [notificationObject setObject:self.htmlString forKey:exceptionManagerPopupBlockedHTML];
+            }
+            if (self.tierName) {
+                [notificationObject setObject:self.tierName forKey:exceptionManagerPopupBlockedTierName];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerInvalidClickNotification
+                                                                object:notificationObject];
+        }
         [self interceptURL:URL];
         return NO;
     } else {
