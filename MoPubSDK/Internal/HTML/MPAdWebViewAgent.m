@@ -226,8 +226,11 @@
         [self performActionForMoPubSpecificURL:URL];
         return NO;
     } else if ([self shouldIntercept:URL navigationType:navigationType]) {
-        if (!self.userInteractedWithWebView &&
-            navigationType == UIWebViewNavigationTypeLinkClicked &&
+        
+        BOOL isInvalidClick =   !self.userInteractedWithWebView &&
+                                navigationType == UIWebViewNavigationTypeLinkClicked;
+        
+        if (isInvalidClick &&
             [MoPub sharedInstance].shouldLogBlockPopup) {
             
             NSMutableDictionary *notificationObject = [NSMutableDictionary new];
@@ -240,6 +243,18 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerInvalidClickNotification
                                                                 object:notificationObject];
         }
+        
+        if (isInvalidClick &&
+            [MoPub sharedInstance].shouldBlockInvalidClick) {
+            NSDictionary *blockedNotificationObject = nil;
+            if (URL.absoluteString) {
+                blockedNotificationObject = @{exceptionManagerPopupBlockedURL: URL.absoluteString};
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerPopupBlockedNotification
+                                                                object:blockedNotificationObject];
+            return NO;
+        }
+        
         [self interceptURL:URL];
         return NO;
     } else {
