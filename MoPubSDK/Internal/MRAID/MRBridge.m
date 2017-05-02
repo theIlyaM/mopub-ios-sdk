@@ -16,6 +16,7 @@
 #import "MRError.h"
 #import "MRProperty.h"
 #import "MRNativeCommandHandler.h"
+#import "LELog.h"
 
 static NSString * const kMraidURLScheme = @"mraid";
 
@@ -179,7 +180,11 @@ static NSString * const kMraidURLScheme = @"mraid";
         [self.delegate bridge:self handleDisplayForDestinationURL:url];
         return NO;
     }
-
+    NSString *logString = [NSString stringWithFormat:@"ADLOG: MRAID userInteractedWithWebView: %d type: %ld url: %@",  userInteractedWithWebView, (long)navigationType, url];
+    NSLog(@"%@",logString);
+    if ([LELog sharedInstance].token) {
+        [[LELog sharedInstance] log:logString];
+    }
     return safeToAutoloadLink;
 }
 

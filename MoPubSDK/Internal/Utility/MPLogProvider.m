@@ -6,6 +6,7 @@
 //
 
 #import "MPLogProvider.h"
+#import "LELog.h"
 
 @interface MPLogProvider ()
 
@@ -73,6 +74,7 @@
 - (void)logMessage:(NSString *)message
 {
     NSLog(@"%@", message);
+    [[LELog sharedInstance] log:message];
 }
 
 - (MPLogLevel)logLevel

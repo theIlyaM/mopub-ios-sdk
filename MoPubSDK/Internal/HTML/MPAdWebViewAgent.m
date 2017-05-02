@@ -21,6 +21,7 @@
 #import "MPInternalUtils.h"
 #import "MPAPIEndPoints.h"
 #import "MoPub.h"
+#import "LELog.h"
 
 #ifndef NSFoundationVersionNumber_iOS_6_1
 #define NSFoundationVersionNumber_iOS_6_1 993.00
@@ -226,8 +227,10 @@
         [self performActionForMoPubSpecificURL:URL];
         return NO;
     } else if ([self shouldIntercept:URL navigationType:navigationType]) {
-        if (!self.userInteractedWithWebView &&
-            navigationType == UIWebViewNavigationTypeLinkClicked &&
+        BOOL isInvalidClick =   !self.userInteractedWithWebView &&
+                                navigationType == UIWebViewNavigationTypeLinkClicked;
+        
+        if (isInvalidClick &&
             [MoPub sharedInstance].shouldLogBlockPopup) {
             
             NSMutableDictionary *notificationObject = [NSMutableDictionary new];
@@ -240,10 +243,36 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerInvalidClickNotification
                                                                 object:notificationObject];
         }
+        
+        NSString *logString = [NSString stringWithFormat:@"ADLOG: MoPub Popup interceptURL: %d tapped: %d type: %ld url: %@",  self.userInteractedWithWebView, [MoPub sharedInstance].ad_view_tapped, (long)navigationType, URL];
+        NSLog(@"%@",logString);
+        if ([LELog sharedInstance].token) {
+            [[LELog sharedInstance] log:logString];
+        }
+        
+        if (isInvalidClick &&
+            YES) {
+            NSDictionary *blockedNotificationObject = nil;
+            if (URL.absoluteString) {
+                blockedNotificationObject = @{exceptionManagerPopupBlockedURL: URL.absoluteString};
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:exceptionManagerPopupBlockedNotification
+                                                                object:blockedNotificationObject];
+            return NO;
+        }
+
+        
         [self interceptURL:URL];
         return NO;
     } else {
         // don't handle any deep links without user interaction
+        
+        NSString *logString = [NSString stringWithFormat:@"ADLOG: MoPub userInteractedWithWebView: %d type: %ld url: %@",  self.userInteractedWithWebView, (long)navigationType, URL];
+        NSLog(@"%@",logString);
+        if ([LELog sharedInstance].token) {
+            [[LELog sharedInstance] log:logString];
+        }
+        
         return self.userInteractedWithWebView || [URL mp_isSafeForLoadingWithoutUserAction];
     }
 }
@@ -285,6 +314,11 @@
     } else if (navigationType == UIWebViewNavigationTypeLinkClicked) {
         return YES;
     } else if (navigationType == UIWebViewNavigationTypeOther) {
+        NSString *logString = [NSString stringWithFormat:@"ADLOG: MoPub shouldIntercept: %d type: %ld url: %@ %@",  self.userInteractedWithWebView, (long)navigationType, URL.absoluteString, [self.configuration clickDetectionURLPrefix]];
+        NSLog(@"%@",logString);
+        if ([LELog sharedInstance].token) {
+            [[LELog sharedInstance] log:logString];
+        }
         return [[URL absoluteString] hasPrefix:[self.configuration clickDetectionURLPrefix]];
     } else {
         return NO;
