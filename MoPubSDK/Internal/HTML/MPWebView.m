@@ -66,15 +66,17 @@ static NSString *const kMoPubFrameKeyPathString = @"frame";
     UIView *webView;
 
     if (!forceUIWebView && [WKWebView class]) {
-        WKUserContentController *contentController = [[WKUserContentController alloc] init];
-        WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-        config.allowsInlineMediaPlayback = kMoPubAllowsInlineMediaPlaybackDefault;
-        if ([config respondsToSelector:@selector(requiresUserActionForMediaPlayback)]) {
-            config.requiresUserActionForMediaPlayback = kMoPubRequiresUserActionForMediaPlaybackDefault;
-        } else {
-            config.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
-        }
-        config.userContentController = contentController;
+		WKUserContentController *contentController = [[WKUserContentController alloc] init];
+		WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+		config.allowsInlineMediaPlayback = kMoPubAllowsInlineMediaPlaybackDefault;
+		if ([config respondsToSelector:@selector(mediaTypesRequiringUserActionForPlayback)]) {
+			config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeAudio;
+		} else if ([config respondsToSelector:@selector(requiresUserActionForMediaPlayback)]) {
+			config.requiresUserActionForMediaPlayback = kMoPubRequiresUserActionForMediaPlaybackDefault;
+		} else {
+			config.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
+		}
+		config.userContentController = contentController;
 
         WKWebView *wkWebView = [[WKWebView alloc] initWithFrame:self.bounds configuration:config];
 
