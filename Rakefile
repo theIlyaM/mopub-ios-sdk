@@ -1,22 +1,26 @@
+require 'yaml'
 require 'rubygems'
 require 'tmpdir'
 require 'timeout'
 require 'pp'
 require 'fileutils'
-require './Scripts/screen_recorder'
-require './Scripts/network_testing'
-require './Scripts/sdk_downloader'
-
-puts ENV["PATH"]
 ENV["PATH"] += ":/usr/local/bin"
 
+if File.exists?('./Scripts/screen_recorder')
+  require './Scripts/screen_recorder'
+end
+if File.exists?('./Scripts/network_testing')
+  require './Scripts/network_testing'
+end
+if File.exists?('./Scripts/sdk_downloader')
+  require './Scripts/sdk_downloader'
+end
 if File.exists?('./Scripts/private/private.rb')
   require './Scripts/private/private.rb'
 end
 
 CONFIGURATION = "Debug"
 BUILD_DIR = File.join(File.dirname(__FILE__), "build")
-CEDAR_OUT = File.join(BUILD_DIR, "mopubsdk-cedar.xml")
 
 class Simulator
   def initialize(options)
@@ -46,9 +50,13 @@ def build_dir(effective_platform_name)
   File.join(BUILD_DIR, CONFIGURATION + effective_platform_name)
 end
 
-def output_file(target)
+def mk_build_dir
   output_dir = File.join(File.dirname(__FILE__), "build")
   FileUtils.mkdir_p(output_dir)
+end
+
+def output_file(target)
+  output_dir = File.join(File.dirname(__FILE__), "build")
   File.join(output_dir, "#{target}.output")
 end
 
@@ -64,10 +72,14 @@ def system_or_exit(cmd, outfile = nil)
 end
 
 def build(options)
-  clean!
   target = options[:target]
-  project = options[:project]
   configuration = options[:configuration] || CONFIGURATION
+  if options[:destination]
+    destination = "-destination #{options[:destination]}"
+  else
+    destination = ""
+  end
+
   if options[:sdk]
     sdk = options[:sdk]
   elsif options[:sdk_version]
@@ -75,46 +87,36 @@ def build(options)
   else
     sdk = "iphonesimulator#{available_sdk_versions.max}"
   end
-  out_file = output_file("mopub_#{options[:target].downcase}_#{sdk}")
-  if target == 'Specs' 
-  	system_or_exit(%Q[xcodebuild -workspace #{project}.xcworkspace -scheme #{target} -configuration #{configuration} -destination 'platform=iOS Simulator,name=iPad' -sdk #{sdk} build SYMROOT=#{BUILD_DIR}], out_file)
+  out_file = output_file("mopub_#{options[:target].downcase.gsub(/\s+/, '')}_#{sdk}")
+
+  if target == "MoPubSDKTests"
+    workspace = options[:workspace]
+    system_or_exit(%Q[xcodebuild -workspace #{workspace}.xcworkspace -scheme #{target} -configuration #{configuration} ARCHS=i386 #{destination} -sdk #{sdk} test SYMROOT=#{BUILD_DIR}], out_file)    
+  elsif options[:workspace]
+    workspace = options[:workspace]
+    system_or_exit(%Q[xcodebuild -workspace #{workspace}.xcworkspace -scheme #{target} -configuration #{configuration} ARCHS=i386 #{destination} -sdk #{sdk} build SYMROOT=#{BUILD_DIR}], out_file)
   else
-	system_or_exit(%Q[xcodebuild -project #{project}.xcodeproj -target #{target} -configuration #{configuration} ARCHS=i386 -sdk #{sdk} build SYMROOT=#{BUILD_DIR}], out_file) 
+    project = options[:project]
+    system_or_exit(%Q[xcodebuild -project '#{project}.xcodeproj' -target '#{target}' -configuration '#{configuration}' ARCHS=i386 #{destination} -sdk '#{sdk}' build SYMROOT=#{BUILD_DIR}], out_file) 
   end
 end
 
-def run_in_simulator(options)
-  app_name = "#{options[:target]}.app"
-  app_location = "#{File.join(build_dir("-iphonesimulator"), app_name)}"
+def archive(config)
+  # perform archive
+  out_file = output_file("mopub_#{config[:scheme].downcase.gsub(/\s+/, '')}_archive")
+  system_or_exit(%Q[/usr/bin/xcodebuild -archivePath '#{BUILD_DIR}/#{config[:archive_path]}' -project '#{config[:project]}.xcodeproj' -scheme '#{config[:scheme]}' -configuration '#{config[:configuration]}' archive CODE_SIGN_IDENTITY='#{config[:code_sign_identity]}' PROVISIONING_PROFILE='#{config[:provision_profile]}' DEVELOPMENT_TEAM='#{config[:development_team]}'], out_file)
+end
 
-  env = options[:environment]
-  simulator = Simulator.new(options)
-
-  # record_video = options[:record_video]
-  # screen_recorder = ScreenRecorder.new(File.expand_path("./Scripts"))
-  # screen_recorder.start_recording if record_video
-
-  if env.include?("CEDAR_JUNIT_XML_FILE") && File.exists?(env["CEDAR_JUNIT_XML_FILE"])
-    File.delete env["CEDAR_JUNIT_XML_FILE"]
+def package(config)
+  if File.exists?(config[:export_options_plist])
+    out_file = output_file("mopub_#{config[:scheme].downcase.gsub(/\s+/, '')}_package")
+    # perform packaging step with exportOptionsPlist
+    system_or_exit(%Q[/usr/bin/xcodebuild -exportArchive -exportOptionsPlist '#{config[:export_options_plist]}' -archivePath '#{BUILD_DIR}/#{config[:archive_path]}' -exportPath '#{BUILD_DIR}/#{config[:ipa_path]}'], out_file)
+    # move from scheme.ipa to ipa_path in config
+    sh "mv \"#{BUILD_DIR}/#{config[:ipa_path]}\" \"#{File.join(BUILD_DIR, "../")}/#{config[:ipa_path]}\" >> #{out_file}"
+  else
+    puts "#{config[:export_options_plist]} does not exist. Cannot package"
   end
-
-  head "Running tests"
-  simulator.run(app_location, env)
-  head "Test run complete"
-
-  if !File.exists? env["CEDAR_JUNIT_XML_FILE"]
-    puts "Tests failed to generate output file"
-    exit(1)
-  end
-
-  # TODO: save the video if it fails
-  # if record_video
-  #   video_path = screen_recorder.save_recording
-  #   puts "Saved video: #{video_path}"
-  # end
-
-  # screen_recorder.stop_recording if record_video
-  return true
 end
 
 def available_sdk_versions
@@ -127,20 +129,41 @@ def available_sdk_versions
   available
 end
 
-def cedar_env
-  {
-    "CEDAR_REPORTER_CLASS" => "CDRColorizedReporter,CDRJUnitXMLReporter",
-    "CFFIXED_USER_HOME" => Dir.tmpdir,
-    "CEDAR_HEADLESS_SPECS" => "1",
-    "CEDAR_JUNIT_XML_FILE" => CEDAR_OUT
-  }
+def symbolize_keys_deep!(h)
+  h.keys.each do |k|
+    ks    = k.respond_to?(:to_sym) ? k.to_sym : k
+    h[ks] = h.delete k # Preserve order even when k == ks
+    symbolize_keys_deep! h[ks] if h[ks].kind_of? Hash
+  end
+end
+
+def enterprise_transform
+  # plist
+  plist_file_names = ['MoPubSampleApp/MoPubSampleApp-Info.plist']
+  plist_file_names.each do |plist_file|
+    text = File.read(plist_file)
+    # bundle identifier
+    text.gsub!("com.mopub.samples.objc.", "com.twitter.qasamples.")
+
+    File.open(plist_file, "w") {|file| file.puts text }
+  end
+
+  #project file
+  project_file_names = ['MoPubSampleApp.xcodeproj/project.pbxproj']
+  project_file_names.each do |project_file|
+    text = File.read(project_file)
+    # change provisioning style so we can manage the provisioning profiles
+    text.gsub!("ProvisioningStyle = Automatic", "ProvisioningStyle = Manual")
+
+    File.open(project_file, "w") {|file| file.puts text }
+  end
 end
 
 desc "Build MoPubSDK on all SDKs then run tests"
-task :default => [:trim_whitespace, "mopubsdk:build", "mopubsample:build", "mopubsdk:spec"] #TODO add back later , "mopubsample:spec", :integration_specs]
+task :default => [:trim_whitespace, "mopubsdk:build", "mopubsample:build", "mopubsdk:unittest"] 
 
-desc "Build MoPubSDK on all SDKs and run all unit tests"
-task :unit_specs => ["mopubsdk:build", "mopubsample:build", "mopubsdk:spec", "mopubsample:spec"]
+desc "Run all unit tests"
+task :unittest => ["mopubsdk:unittest"]
 
 desc "Run KIF integration tests"
 task :integration_specs => ["mopubsample:kif"]
@@ -152,6 +175,13 @@ task :trim_whitespace do
   system_or_exit(%Q[git status --short | awk '{if ($1 != "D" && $1 != "R") for (i=2; i<=NF; i++) printf("%s%s", $i, i<NF ? " " : ""); print ""}' | grep -e '.*.[mh]"*$' | xargs sed -i '' -e 's/	/    /g;s/ *$//g;'])
 end
 
+desc "Cleans the build directory"
+task :clean do
+  head "Cleaning Build Directory"
+  clean!
+  mk_build_dir
+end
+
 desc "Download Ad Network SDKs"
 task :download_sdks do
   head "Downloading Ad Network SDKs"
@@ -161,7 +191,7 @@ end
 
 namespace :mopubsdk do
   desc "Build MoPub SDK against all available SDK versions"
-  task :build do
+  task :build => ['clean'] do
     available_sdk_versions.each do |sdk_version|
       head "Building MoPubSDK for #{sdk_version}"
       build :project => "MoPubSDK", :target => "MoPubSDK", :sdk_version => sdk_version
@@ -171,97 +201,60 @@ namespace :mopubsdk do
       head "Building MoPubSDK+Networks for #{sdk_version}"
       build :project => "MoPubSDK", :target => "MoPubSDK+Networks", :sdk_version => sdk_version
     end
-
-    head "Building MoPubSDK Fabric"
-    build :project => "MoPubSDK", :target => "Fabric"
     
     head "SUCCESS"
   end
 
-  desc "Run MoPubSDK Cedar Specs with specified iOS Simulator using argument 'simulator_version'"
-  task :spec do
-    head "Building Specs"
-    build :project => "MoPubSDK", :target => "Specs"
+  desc "Run unit tests with specified iOS Simulator using argument 'simulator_version'"
+  task :unittest => ['clean'] do
 
     simulator_version = ENV['simulator_version']
     if (!simulator_version)
       simulator_version = available_sdk_versions.max
     end
 
-    head "Running Specs in iOS Simulator version #{simulator_version}"
-    run_in_simulator(:project => "MoPubSDK", :target => "Specs", :environment => cedar_env, :sdk => simulator_version)
+    head "Running unit tests in iOS Simulator version #{simulator_version}"
+    build :workspace => "MoPubSDK", :target => "MoPubSDKTests", :destination => "'platform=iOS Simulator,name=iPad'"
 
     head "SUCCESS"
   end
 end
 
-namespace :mopubsample do
-  desc "Build MoPub Sample App"
-  task :build do
-    head "Building MoPub Sample App"
-    build :project => "MoPubSampleApp", :target => "MoPubSampleApp"
-  end
+if File.exists?('xcodebuild.yml')
+  YAML::load(File.open('xcodebuild.yml')).each do |build_name, config|
+    symbolize_keys_deep!(config)
+    namespace build_name do
+      desc "Build #{config[:log_name]} "
+      task :build => ['clean'] do
+        head "Building #{config[:log_name]}"
+        build(config)
+      end
 
-  desc "Run MoPub Sample App Cedar Specs"
-  task :spec do
-    head "Building Sample App Cedar Specs"
-    build :project => "MoPubSampleApp", :target => "SampleAppSpecs"
+      desc "Archive #{config[:log_name]}"
+      task :archive => ['clean', 'setup_build_environment'] do
+        head "Archiving #{config[:log_name]}"
+        archive(config)
+      end
 
-    head "Running Sample App Cedar Specs"
-    run_in_simulator(:project => "MoPubSampleApp", :target => "SampleAppSpecs", :environment => cedar_env, :success_condition => ", 0 failures")
-  end
+      desc "Package #{config[:log_name]} to IPA"
+      task :package => ['archive'] do
+        head "Packaging #{config[:log_name]} to IPA"
+        package(config)
+      end
 
-  desc "Build Mopub Sample App with Crashlytics"
-  task :crashlytics do
-    current_branch = `git rev-parse --abbrev-ref HEAD`
-
-    current_branch = current_branch.strip()
-
-    should_switch_git_branch = current_branch != "crashlytics-integration"
-
-    if should_switch_git_branch
-      system_or_exit(%Q[git co crashlytics-integration])
-      sleep 2
-    end
-
-    head "Launching Crashlytics App"
-    system_or_exit(%Q[open /Applications/Crashlytics.app])
-
-    head "Giving Crashlytics time to update"
-    sleep 5
-
-    head "Building MoPub Sample App with Crashlytics"
-    build :project => "MoPubSampleApp", :target => "MoPubSampleApp"
-
-    if should_switch_git_branch
-      system_or_exit(%Q[git co #{current_branch}])
-      sleep 2
-
-      head "Cleaning up"
-      system_or_exit(%Q[rm -rf Crashlytics.framework/])
+      task :setup_build_environment do
+        enterprise_transform
+      end
     end
   end
-
-  desc "Run MoPub Sample App Integration Specs"
-  task :kif do |t, args|
-    head "Building KIF Integration Suite"
-    build :project => "MoPubSampleApp", :target => "SampleAppKIF"
-    head "Running KIF Integration Suite"
-
-    network_testing = NetworkTesting.new
-
-    kif_log_file = nil
-    network_testing.run_with_proxy do
-      kif_log_file = run_in_simulator(:project => "MoPubSampleApp", :target => "SampleAppKIF", :success_condition => "TESTING FINISHED: 0 failures", :record_video => ENV['IS_CI_BOX'])
+else
+  namespace :mopubsample do
+    desc "Build MoPub Sample App"
+    task :build => ['clean'] do
+      head "Building MoPub Sample App"
+      build :project => "MoPubSampleApp", :target => "MoPubSampleApp"
     end
-
-    network_testing.verify_kif_log_lines(File.readlines(kif_log_file))
   end
-end
-
-desc "Remove any focus from specs"
-task :nof do
-  system_or_exit %Q[ grep -l -r -e "\\(fit\\|fdescribe\\|fcontext\\)" Specs | grep -v -e 'Specs/Frameworks' -e 'JasmineSpecs' | xargs -I{} sed -i '' -e 's/fit\(@/it\(@/g;' -e 's/fdescribe\(@/describe\(@/g;' -e 's/fcontext\(@/context\(@/g;' "{}" ]
 end
 
 desc "Run jasmine specs"
@@ -278,4 +271,3 @@ task :run_jasmine do
     end
   end
 end
-

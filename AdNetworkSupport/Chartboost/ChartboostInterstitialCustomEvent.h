@@ -11,11 +11,9 @@
     #import "MPInterstitialCustomEvent.h"
 #endif
 
-
 /*
- * Certified with version 6.5.2 of the Chartboost SDK.
+ * Certified with Chartboost 6.6.3
  */
-
 @interface ChartboostInterstitialCustomEvent : MPInterstitialCustomEvent
 
 /**

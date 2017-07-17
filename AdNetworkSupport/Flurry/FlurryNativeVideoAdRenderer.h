@@ -12,6 +12,9 @@
 @class MPNativeAdRendererConfiguration;
 @class MPStaticNativeAdRendererSettings;
 
+/*
+ * Certified with Flurry 8.0.0
+ */
 @interface FlurryNativeVideoAdRenderer : NSObject <MPNativeAdRenderer>
 
 @property (nonatomic, readonly) MPNativeViewSizeHandler viewSizeHandler;
