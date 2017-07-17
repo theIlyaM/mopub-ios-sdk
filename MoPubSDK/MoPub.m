@@ -11,13 +11,9 @@
 #import "MPGeolocationProvider.h"
 #import "MPRewardedVideo.h"
 #import "MPIdentityProvider.h"
+#import "MOPUBExperimentProvider.h"
 
-// If Fabric headers are integrated from multiple third party frameworks, there might be naming conflict.
-// Use relative path could solve the naming conflict.
-#import "Internal/Fabric/FABKitProtocol.h"
-#import "Internal/Fabric/Fabric+FABKits.h"
-
-@interface MoPub () <FABKit>
+@interface MoPub ()
 
 @property (nonatomic, strong) NSArray *globalMediationSettings;
 
@@ -35,16 +31,6 @@
     return sharedInstance;
 }
 
-+ (NSString *)bundleIdentifier
-{
-    return MP_BUNDLE_IDENTIFIER;
-}
-
-+ (NSString *)kitDisplayVersion
-{
-    return MP_SDK_VERSION;
-}
-
 - (void)setLocationUpdatesEnabled:(BOOL)locationUpdatesEnabled
 {
     [[[MPCoreInstanceProvider sharedProvider] sharedMPGeolocationProvider] setLocationUpdatesEnabled:locationUpdatesEnabled];
@@ -58,6 +44,11 @@
 - (void)setFrequencyCappingIdUsageEnabled:(BOOL)frequencyCappingIdUsageEnabled
 {
     [MPIdentityProvider setFrequencyCappingIdUsageEnabled:frequencyCappingIdUsageEnabled];
+}
+
+- (void)setClickthroughDisplayAgentType:(MOPUBDisplayAgentType)displayAgentType
+{
+    [MOPUBExperimentProvider setDisplayAgentType:displayAgentType];
 }
 
 - (BOOL)frequencyCappingIdUsageEnabled

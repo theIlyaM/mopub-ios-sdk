@@ -6,7 +6,7 @@ Sign up for an account at [http://app.mopub.com/](http://app.mopub.com/).
 
 ## Need Help?
 
-You can find integration documentation on our [wiki](https://github.com/mopub/mopub-ios-sdk/wiki/Getting-Started) and additional help documentation on our [developer help site](http://dev.twitter.com/mopub).
+You can find integration documentation on our [wiki](https://github.com/mopub/mopub-ios-sdk/wiki/Getting-Started) and additional help documentation on our [developer help site](https://www.mopub.com/resources/docs).
 
 To file an issue with our team visit the [MoPub Forum](https://twittercommunity.com/c/fabric/mopub) or email [support@mopub.com](mailto:support@mopub.com).
 
@@ -19,12 +19,12 @@ The MoPub SDK is distributed as source code that you can include in your applica
 - **[MoPub Base SDK.zip](http://bit.ly/2bH8ObO)**
 
   Includes everything you need to serve HTML, MRAID, and Native MoPub advertisements.  Third party ad networks are not included.
-  
+
 - **[MoPub Base SDK Excluding Native.zip](http://bit.ly/2bCCgRw)**
 
   Includes everything you need to serve HTML and MRAID advertisements.  Third party ad networks and Native MoPub advertisements are not included.
 
-The current version of the SDK is 4.11.1
+The current version of the SDK is 4.15.0
 
 ## Integrate
 
@@ -36,9 +36,9 @@ More detailed class documentation is available in the repo under the `ClassDocum
 
 Please view the [changelog](https://github.com/mopub/mopub-ios-sdk/blob/master/CHANGELOG.md) for details.
 
-- **App Transport Security Updates**
-	- Checks for "NSAllowsArbitraryLoadsInMedia" were changed to "NSAllowsArbitraryLoadsForMedia", per updated Apple documentation
-	- Resolves issue in which explicitly using NSAllowsArbitraryLoadsForMedia or NSAllowsArbitraryLoadsInWebContent causes HTTP clickthroughs not to resolve on iOS 10.1 or higher
+- **Bug Fixes**
+    - Updated Facebook Audience Network banner and interstitial impression tracking
+    - Allow taps to pass through the gradient overlays for rewarded videos
 
 See the [Getting Started Guide](https://github.com/mopub/mopub-ios-sdk/wiki/Getting-Started#app-transport-security-settings) for instructions on setting up ATS in your app.  
 

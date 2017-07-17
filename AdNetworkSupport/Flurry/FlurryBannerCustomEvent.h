@@ -13,6 +13,9 @@
 #import "MPBannerCustomEvent.h"
 #endif
 
+/*
+ * Certified with Flurry 8.0.0
+ */
 @interface FlurryBannerCustomEvent : MPBannerCustomEvent <FlurryAdBannerDelegate>
 
 @end

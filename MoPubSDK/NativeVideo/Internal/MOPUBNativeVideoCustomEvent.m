@@ -29,7 +29,7 @@
 - (void)handleSuccessfulVastParsing:(MPVASTResponse *)mpVastResponse info:(NSDictionary *)info
 {
     NSMutableDictionary *infoMutableCopy = [info mutableCopy];
-    [infoMutableCopy setObject:[[MPVideoConfig alloc] initWithVASTResponse:mpVastResponse] forKey:kVideoConfigKey];
+    [infoMutableCopy setObject:[[MPVideoConfig alloc] initWithVASTResponse:mpVastResponse additionalTrackers:((MOPUBNativeVideoAdConfigValues *)info[kNativeVideoAdConfigKey]).trackers] forKey:kVideoConfigKey];
     MOPUBNativeVideoAdAdapter *adAdapter = [[MOPUBNativeVideoAdAdapter alloc] initWithAdProperties:infoMutableCopy];
 	adAdapter.tierName = self.tierName;
     if (adAdapter.properties) {
