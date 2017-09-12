@@ -61,7 +61,7 @@
 
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
 {
-	self.tierName = [info objectForKey:@"name"] ? : nativeAdNetworkMoPub;
+	self.tierName = [info objectForKey:@"name"] ? : nativeAdNetworkMoPubVideo;
 
     MOPUBNativeVideoAdConfigValues *nativeVideoAdConfigValues = [info objectForKey:kNativeVideoAdConfigKey];
     if (nativeVideoAdConfigValues && [nativeVideoAdConfigValues isValid]) {
