@@ -70,11 +70,11 @@ static NSString *const kMoPubFrameKeyPathString = @"frame";
 		WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
 		config.allowsInlineMediaPlayback = kMoPubAllowsInlineMediaPlaybackDefault;
 		if ([config respondsToSelector:@selector(mediaTypesRequiringUserActionForPlayback)]) {
-			config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeAudio;
+			config.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeAll;
 		} else if ([config respondsToSelector:@selector(requiresUserActionForMediaPlayback)]) {
-			config.requiresUserActionForMediaPlayback = kMoPubRequiresUserActionForMediaPlaybackDefault;
+			config.requiresUserActionForMediaPlayback = YES;
 		} else {
-			config.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
+			config.mediaPlaybackRequiresUserAction = YES;
 		}
 		config.userContentController = contentController;
 
