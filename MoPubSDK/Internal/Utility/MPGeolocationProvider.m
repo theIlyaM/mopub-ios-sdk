@@ -132,11 +132,7 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
 
 - (BOOL)isAuthorizedStatus:(CLAuthorizationStatus)status
 {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
     return (status == kCLAuthorizationStatusAuthorizedAlways) || (status == kCLAuthorizationStatusAuthorizedWhenInUse);
-#else
-    return status == kCLAuthorizationStatusAuthorized;
-#endif
 }
 
 /**

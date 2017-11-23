@@ -29,7 +29,7 @@
 - (void)handleSuccessfulVastParsing:(MPVASTResponse *)mpVastResponse info:(NSDictionary *)info
 {
     NSMutableDictionary *infoMutableCopy = [info mutableCopy];
-    [infoMutableCopy setObject:[[MPVideoConfig alloc] initWithVASTResponse:mpVastResponse additionalTrackers:((MOPUBNativeVideoAdConfigValues *)info[kNativeVideoAdConfigKey]).trackers] forKey:kVideoConfigKey];
+    [infoMutableCopy setObject:[[MPVideoConfig alloc] initWithVASTResponse:mpVastResponse additionalTrackers:((MOPUBNativeVideoAdConfigValues *)info[kNativeAdConfigKey]).trackers] forKey:kVideoConfigKey];
     MOPUBNativeVideoAdAdapter *adAdapter = [[MOPUBNativeVideoAdAdapter alloc] initWithAdProperties:infoMutableCopy];
 	adAdapter.tierName = self.tierName;
     if (adAdapter.properties) {
@@ -63,7 +63,8 @@
 {
 	self.tierName = [info objectForKey:@"name"] ? : nativeAdNetworkMoPubVideo;
 
-    MOPUBNativeVideoAdConfigValues *nativeVideoAdConfigValues = [info objectForKey:kNativeVideoAdConfigKey];
+    MOPUBNativeVideoAdConfigValues *nativeVideoAdConfigValues = [info objectForKey:kNativeAdConfigKey];
+
     if (nativeVideoAdConfigValues && [nativeVideoAdConfigValues isValid]) {
         NSString *vastString = [info objectForKey:kVASTVideoKey];
         if (vastString) {

@@ -8,8 +8,6 @@
 #import "MPActivityViewControllerHelper.h"
 #import "MPInstanceProvider.h"
 
-
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
 /**
  * MPActivityItemProviderWithSubject subclasses UIActivityItemProvider
  * to provide a subject for email activity types.
@@ -47,13 +45,10 @@
 }
 
 @end
-#endif
 
 @interface MPActivityViewControllerHelper()
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
 - (UIActivityViewController *)initializeActivityViewControllerWithSubject:(NSString *)subject body:(NSString *)body;
-#endif
 
 @end
 
@@ -68,7 +63,6 @@
     return self;
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
 - (UIActivityViewController *)initializeActivityViewControllerWithSubject:(NSString *)subject body:(NSString *)body
 {
     if (NSClassFromString(@"UIActivityViewController") && NSClassFromString(@"UIActivityItemProvider")) {
@@ -86,18 +80,16 @@
         return nil;
     }
 }
-#endif
 
 - (BOOL)presentActivityViewControllerWithSubject:(NSString *)subject body:(NSString *)body
 {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
     if (NSClassFromString(@"UIActivityViewController")) {
         UIActivityViewController *activityViewController = [self initializeActivityViewControllerWithSubject:subject body:body];
         if (activityViewController) {
             if ([self.delegate respondsToSelector:@selector(activityViewControllerWillPresent)]) {
                 [self.delegate activityViewControllerWillPresent];
             }
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+
             UIUserInterfaceIdiom userInterfaceIdiom = [[[MPCoreInstanceProvider sharedProvider]
                                                         sharedCurrentDevice] userInterfaceIdiom];
             // iPad must present as popover on iOS >= 8
@@ -107,7 +99,7 @@
                         [self.delegate viewControllerForPresentingActivityViewController].view;
                 }
             }
-#endif
+
             UIViewController *viewController = [self.delegate viewControllerForPresentingActivityViewController];
             [viewController presentViewController:activityViewController
                                          animated:YES
@@ -115,7 +107,7 @@
             return YES;
         }
     }
-#endif
+
     return NO;
 }
 
