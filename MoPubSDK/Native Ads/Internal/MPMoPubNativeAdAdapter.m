@@ -72,7 +72,7 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
         // Grab the config, figure out requiredSecondsForImpression and requiredViewVisibilityPercentage,
         // and set up the timer.
         MPNativeAdConfigValues *config = properties[kNativeAdConfigKey];
-        NSTimeInterval requiredSecondsForImpression = config.isImpressionMinVisibleSecondsValid ? config.impressionMinVisibleSeconds : kMoPubRequiredSecondsForImpression;
+        NSTimeInterval requiredSecondsForImpression = kMoPubRequiredSecondsForImpression;
         if (config.isImpressionMinVisiblePixelsValid) {
             _impressionTimer = [[MPAdImpressionTimer alloc] initWithRequiredSecondsForImpression:requiredSecondsForImpression
                                                                           requiredViewVisibilityPixels:config.impressionMinVisiblePixels];
