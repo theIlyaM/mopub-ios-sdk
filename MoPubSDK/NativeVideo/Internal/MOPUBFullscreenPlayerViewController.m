@@ -17,7 +17,7 @@
 #import "UIColor+MPAdditions.h"
 
 static CGFloat const kDaaIconFullscreenLeftMargin = 16.0f;
-static CGFloat const kDaaIconFullscreenTopMargin = 16.0f;
+static CGFloat const kDaaIconFullscreenTopMargin = 16.0f + 24.0f;
 static CGFloat const kDaaIconSize = 16.0f;
 static CGFloat const kCloseButtonRightMargin = 16.0f;
 static CGFloat const kDefaultButtonTouchAreaInsets = 10.0f;
@@ -102,17 +102,19 @@ static CGFloat const kStallSpinnerSize = 35.0f;
     [self.closeButton sizeToFit];
     [self.view addSubview:self.closeButton];
 
-    self.ctaButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.ctaButton setTitle:kCtaButtonTitleText forState:UIControlStateNormal];
-    [self.ctaButton setBackgroundColor:[UIColor mp_colorFromHexString:kCtaButtonBackgroundColor alpha:kCtaButtonBackgroundAlpha]];
-    [self.ctaButton addTarget:self action:@selector(ctaButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    self.ctaButton.layer.cornerRadius = kCtaButtonBottomCornerRadius;
-    self.ctaButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kCtaButtonBottomFontSize];
-    [self.ctaButton setContentEdgeInsets:UIEdgeInsetsMake(kCtaButtonContentInsetsVertical, kCtaButtonContentInsetsHorizontal, kCtaButtonContentInsetsVertical, kCtaButtonContentInsetsHorizontal)];
-    [[self.ctaButton layer] setBorderWidth:kCtaButtonBottomBorderWidth];
-    [[self.ctaButton layer] setBorderColor:[UIColor whiteColor].CGColor];
-    [self.ctaButton sizeToFit];
-    [self.view addSubview:self.ctaButton];
+    if (self.playerController.defaultActionURL) {
+        self.ctaButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [self.ctaButton setTitle:kCtaButtonTitleText forState:UIControlStateNormal];
+        [self.ctaButton setBackgroundColor:[UIColor mp_colorFromHexString:kCtaButtonBackgroundColor alpha:kCtaButtonBackgroundAlpha]];
+        [self.ctaButton addTarget:self action:@selector(ctaButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+        self.ctaButton.layer.cornerRadius = kCtaButtonBottomCornerRadius;
+        self.ctaButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kCtaButtonBottomFontSize];
+        [self.ctaButton setContentEdgeInsets:UIEdgeInsetsMake(kCtaButtonContentInsetsVertical, kCtaButtonContentInsetsHorizontal, kCtaButtonContentInsetsVertical, kCtaButtonContentInsetsHorizontal)];
+        [[self.ctaButton layer] setBorderWidth:kCtaButtonBottomBorderWidth];
+        [[self.ctaButton layer] setBorderColor:[UIColor whiteColor].CGColor];
+        [self.ctaButton sizeToFit];
+        [self.view addSubview:self.ctaButton];
+    }
 
     if (!self.playerController.isReadyToPlay) {
         [self createPlayerNotReadySpinner];

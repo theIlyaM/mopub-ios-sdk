@@ -11,6 +11,7 @@
 #import "MPLogging.h"
 #import "MOPUBNativeVideoAdConfigValues.h"
 #import "MPAdImpressionTimer.h"
+#import "MPVideoConfig.h"
 
 @interface MOPUBNativeVideoAdAdapter() <MPAdDestinationDisplayAgentDelegate, MPAdImpressionTimerDelegate>
 
@@ -65,6 +66,17 @@
 
         _defaultActionURL = [NSURL URLWithString:[properties objectForKey:kDefaultActionURLKey]];
 
+        if ([properties objectForKey:kVideoConfigKey] && [[properties objectForKey:kVideoConfigKey] isKindOfClass:[MPVideoConfig class]]) {
+            MPVideoConfig *videoConfig = (MPVideoConfig *)[properties objectForKey:kVideoConfigKey];
+            
+            if (videoConfig.clickThroughURL.absoluteString.length > 0) {
+                _defaultActionURL = videoConfig.clickThroughURL;
+                if (![[properties objectForKey:kAdCTATextKey] isKindOfClass:[NSString class]] ||
+                    !((NSString *)[properties objectForKey:kAdCTATextKey]).length) {
+                    [properties setObject:NSLocalizedString(@"nativead_call_to_action", nil) forKey:kAdCTATextKey];
+                }
+            }
+        }
         [properties removeObjectsForKeys:[NSArray arrayWithObjects:kImpressionTrackerURLsKey, kClickTrackerURLKey, kDefaultActionURLKey, nil]];
         _properties = properties;
 
@@ -110,13 +122,14 @@
 
     // If we have a valid pixel value, use it to track the impression. If not, use percentage instead.
     if (nativeVideoAdConfig.isImpressionMinVisiblePixelsValid) {
-        self.impressionTimer = [[MPAdImpressionTimer alloc] initWithRequiredSecondsForImpression:nativeVideoAdConfig.impressionMinVisibleSeconds
+        self.impressionTimer = [[MPAdImpressionTimer alloc] initWithRequiredSecondsForImpression:0
                                                                     requiredViewVisibilityPixels:nativeVideoAdConfig.impressionMinVisiblePixels];
     } else {
         // impressionMinVisiblePercent is an integer (a value of 50 means 50%) while the impression timer takes in a float (.50 means 50%) so we have to multiply it by .01f.
-        self.impressionTimer = [[MPAdImpressionTimer alloc] initWithRequiredSecondsForImpression:nativeVideoAdConfig.impressionMinVisibleSeconds
+        self.impressionTimer = [[MPAdImpressionTimer alloc] initWithRequiredSecondsForImpression:0
                                                                 requiredViewVisibilityPercentage:nativeVideoAdConfig.impressionMinVisiblePercent * 0.01f];
     }
+    
     self.impressionTimer.delegate = self;
 
     [self.impressionTimer startTrackingView:view];
