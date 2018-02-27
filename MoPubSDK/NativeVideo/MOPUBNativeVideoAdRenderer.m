@@ -103,7 +103,10 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
         self.adView.nativeMainTextLabel.text = [adapter.properties objectForKey:kAdTextKey];
     }
 
-    if ([self.adView respondsToSelector:@selector(nativeTitleTextLabel)] && [adapter.properties objectForKey:kAdTitleKey]) {
+    NSString *titleText = [adapter.properties objectForKey:kAdTitleKey];
+    if ([self.adView respondsToSelector:@selector(nativeTitleTextLabel)] &&
+        [titleText isKindOfClass:NSString.class] &&
+        titleText.length > 0) {
         self.adView.nativeTitleTextLabel.text = [adapter.properties objectForKey:kAdTitleKey];
     }
 

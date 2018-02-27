@@ -102,7 +102,7 @@ static CGFloat const kStallSpinnerSize = 35.0f;
     [self.closeButton sizeToFit];
     [self.view addSubview:self.closeButton];
 
-    if (self.playerController.defaultActionURL) {
+    if (self.playerController.defaultActionURL.absoluteString.length > 0) {
         self.ctaButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [self.ctaButton setTitle:kCtaButtonTitleText forState:UIControlStateNormal];
         [self.ctaButton setBackgroundColor:[UIColor mp_colorFromHexString:kCtaButtonBackgroundColor alpha:kCtaButtonBackgroundAlpha]];
