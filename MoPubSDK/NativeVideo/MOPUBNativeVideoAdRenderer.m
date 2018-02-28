@@ -74,9 +74,6 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
 {
     [_autoPlayTimer invalidate];
     _autoPlayTimer = nil;
-
-    // free the video memory
-    [[MOPUBPlayerManager sharedInstance] disposePlayerViewController];
 }
 
 - (UIView *)retrieveViewWithAdapter:(MOPUBNativeVideoAdAdapter<MPNativeAdAdapter> *)adapter error:(NSError **)error
