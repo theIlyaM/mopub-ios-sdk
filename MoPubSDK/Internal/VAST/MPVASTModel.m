@@ -179,9 +179,11 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
     if ([object isKindOfClass:[NSArray class]]) {
         for (id obj in object) {
-            id model = [self.mapper mappedObjectFromSourceObject:obj];
-            if (model) {
-                [result addObject:model];
+            if ([obj isKindOfClass:[self.mapper requiredSourceObjectClass]]) {
+                id model = [self.mapper mappedObjectFromSourceObject:obj];
+                if (model) {
+                    [result addObject:model];
+                }
             }
         }
     } else if ([object isKindOfClass:[self.mapper requiredSourceObjectClass]]) {
@@ -232,9 +234,11 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
                     if ([mapper conformsToProtocol:@protocol(MPObjectMapper)]) {
                         id sourceObject = [dictionary valueForKeyPath:dictionaryKeyPath];
                         if (sourceObject) {
-                            id model = [mapper mappedObjectFromSourceObject:sourceObject];
-                            if (model) {
-                                [self setValue:model forKey:key];
+                            if ([sourceObject isKindOfClass:[mapper requiredSourceObjectClass]]) {
+                                id model = [mapper mappedObjectFromSourceObject:sourceObject];
+                                if (model) {
+                                    [self setValue:model forKey:key];
+                                }
                             }
                         }
                     }
