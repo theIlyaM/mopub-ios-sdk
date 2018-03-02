@@ -91,7 +91,10 @@ const CGFloat MPNativeViewDynamicDimension = -1.0;
         self.adView.nativeMainTextLabel.text = [adapter.properties objectForKey:kAdTextKey];
     }
 
-    if ([self.adView respondsToSelector:@selector(nativeTitleTextLabel)]) {
+    NSString *titleText = [adapter.properties objectForKey:kAdTitleKey];
+    if ([self.adView respondsToSelector:@selector(nativeTitleTextLabel)] &&
+        [titleText isKindOfClass:NSString.class] &&
+        titleText.length > 0) {
         self.adView.nativeTitleTextLabel.text = [adapter.properties objectForKey:kAdTitleKey];
     }
 
