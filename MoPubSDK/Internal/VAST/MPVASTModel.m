@@ -41,8 +41,11 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
 - (id)mappedObjectFromSourceObject:(id)object
 {
-    NSString *URLString = [object stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    return [NSURL URLWithString:URLString];
+    if ([object isKindOfClass:[self requiredSourceObjectClass]]) {
+        NSString *URLString = [object stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        return [NSURL URLWithString:URLString];
+    }
+    return nil;
 }
 
 - (Class)requiredSourceObjectClass
@@ -58,7 +61,10 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
 - (id)mappedObjectFromSourceObject:(id)object
 {
-    return @([MPVASTStringUtilities timeIntervalFromString:object]);
+    if ([object isKindOfClass:[self requiredSourceObjectClass]]) {
+        return @([MPVASTStringUtilities timeIntervalFromString:object]);
+    }
+    return nil;
 }
 
 - (Class)requiredSourceObjectClass
@@ -96,7 +102,10 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
 - (id)mappedObjectFromSourceObject:(id)object
 {
-    return [self.numberFormatter numberFromString:object];
+    if ([object isKindOfClass:[self requiredSourceObjectClass]]) {
+        return [self.numberFormatter numberFromString:object];
+    }
+    return nil;
 }
 
 - (Class)requiredSourceObjectClass
@@ -179,11 +188,9 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
     if ([object isKindOfClass:[NSArray class]]) {
         for (id obj in object) {
-            if ([obj isKindOfClass:[self.mapper requiredSourceObjectClass]]) {
-                id model = [self.mapper mappedObjectFromSourceObject:obj];
-                if (model) {
-                    [result addObject:model];
-                }
+            id model = [self.mapper mappedObjectFromSourceObject:obj];
+            if (model) {
+                [result addObject:model];
             }
         }
     } else if ([object isKindOfClass:[self.mapper requiredSourceObjectClass]]) {
@@ -234,11 +241,9 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
                     if ([mapper conformsToProtocol:@protocol(MPObjectMapper)]) {
                         id sourceObject = [dictionary valueForKeyPath:dictionaryKeyPath];
                         if (sourceObject) {
-                            if ([sourceObject isKindOfClass:[mapper requiredSourceObjectClass]]) {
-                                id model = [mapper mappedObjectFromSourceObject:sourceObject];
-                                if (model) {
-                                    [self setValue:model forKey:key];
-                                }
+                            id model = [mapper mappedObjectFromSourceObject:sourceObject];
+                            if (model) {
+                                [self setValue:model forKey:key];
                             }
                         }
                     }
