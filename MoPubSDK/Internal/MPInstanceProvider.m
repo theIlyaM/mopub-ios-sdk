@@ -114,7 +114,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
     if (configuration.customEventClass) {
 		// to exclude from stats mraid banner inside AmazonMMB
 		NSObject *viewDelegate = [[(NSObject *)delegate valueForKey:@"_delegate"] valueForKey:@"_delegate"];
-		if ([viewDelegate isKindOfClass:[MPBannerCustomEvent class]])
+        if ([viewDelegate isKindOfClass:[MPBannerCustomEvent class]] || [viewDelegate isKindOfClass:NSClassFromString(@"AmazonMRECNativeAdAdapter")])
         	return [[MPBannerCustomEventAdapter alloc] initWithDelegate:delegate];
 		else
 			return [(MPBannerCustomEventAdapter *)[FCBannerCustomEventAdapter alloc] initWithDelegate:delegate];
