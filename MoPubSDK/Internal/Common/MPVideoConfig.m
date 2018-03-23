@@ -181,7 +181,9 @@
     NSMutableArray *trackingEventDictionaries = [NSMutableArray array];
 
     for (MPVASTCreative *creative in wrapper.creatives) {
-        [trackingEventDictionaries addObject:creative.linearAd.trackingEvents];
+        if (creative.linearAd.trackingEvents) {
+            [trackingEventDictionaries addObject:creative.linearAd.trackingEvents];
+        }
     }
 
     return [self dictionaryByMergingTrackingDictionaries:trackingEventDictionaries];
