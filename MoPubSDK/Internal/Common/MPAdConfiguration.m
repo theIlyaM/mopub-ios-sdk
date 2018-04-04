@@ -169,7 +169,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
 
         self.nativeImpressionMinVisiblePercent = [self percentFromHeaders:headers forKey:kNativeImpressionMinVisiblePercentHeaderKey];
 
-        self.nativeImpressionMinVisibleTimeInterval = [self timeIntervalFromMsHeaders:headers forKey:kNativeImpressionVisibleMsHeaderKey];
+        self.nativeImpressionMinVisibleTimeInterval = 0.1;
 
         self.nativeVideoMaxBufferingTime = [self timeIntervalFromMsHeaders:headers forKey:kNativeVideoMaxBufferingTimeMsHeaderKey];
 #if MP_HAS_NATIVE_PACKAGE
