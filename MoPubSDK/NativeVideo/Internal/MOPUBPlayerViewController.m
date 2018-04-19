@@ -630,5 +630,22 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
     [self resume];
 }
 
+#pragma mark - Funcore custom API
+
+// Fix for II-4508: Add using cache
+- (void)loadAndPlayVideoUsingCache {
+    self.startedLoading = YES;
+    
+    NSArray *requestedKeys = @[kTracksKey, kPlayableKey];
+    
+    __weak __typeof(self) weakSelf = self;
+    [[IFMOPUBContentProvider instance] assetForUrl:self.mediaURL completion:^(AVURLAsset * _Nonnull asset) {
+        __typeof__(self) strongSelf = weakSelf;
+        [strongSelf prepareToPlayAsset:asset withKeys:requestedKeys];
+        
+        MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:strongSelf.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);        
+    }];
+}
+
 @end
 
