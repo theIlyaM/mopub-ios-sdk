@@ -74,4 +74,6 @@
 - (void)willEnterFullscreen;
 - (void)willExitFullscreen;
 
+- (void)loadAndPlayVideoUsingCache;
+
 @end
