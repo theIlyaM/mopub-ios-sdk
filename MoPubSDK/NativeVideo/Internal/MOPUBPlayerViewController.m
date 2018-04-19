@@ -333,7 +333,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         _loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
         _loadingIndicator.hidesWhenStopped = YES;
         _loadingIndicator.color = [UIColor whiteColor];
-        [self.view addSubview:_loadingIndicator];
+//        [self.view addSubview:_loadingIndicator];
     }
     return _loadingIndicator;
 }
@@ -342,12 +342,22 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 {
     [self.loadingIndicator.superview bringSubviewToFront:_loadingIndicator];
     [self.loadingIndicator startAnimating];
+    
+    // Fix for II-4508: Add iFunny custom indicator
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginLoadingVideo
+                                                        object:self
+                                                      userInfo:@{kMopubMediaUrl : self.mediaURL}];
 }
 
 - (void)stopLoadingIndicator
 {
     if (_loadingIndicator && _loadingIndicator.isAnimating) {
         [_loadingIndicator stopAnimating];
+        
+        // Fix for II-4508: Add iFunny custom indicator
+        [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubEndLoadingVideo
+                                                            object:self
+                                                          userInfo:@{kMopubMediaUrl : self.mediaURL}];
     }
 }
 

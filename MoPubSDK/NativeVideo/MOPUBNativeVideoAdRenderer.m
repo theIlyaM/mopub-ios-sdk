@@ -210,7 +210,8 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
         if (playVisible) {
             // start new
             if ([self.videoController shouldStartNewPlayer]) {
-                [self.videoController loadAndPlayVideo];
+                [self.videoController loadAndPlayVideoUsingCache]; // Improved implementation by Funcore
+                // [self.videoController loadAndPlayVideo]; // Standart implementation by MoPub SDK
             }
 
             // resume play
