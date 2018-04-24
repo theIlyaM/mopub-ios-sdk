@@ -217,7 +217,11 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         self.playerItem = [AVPlayerItem playerItemWithAsset:asset];
         self.avPlayer = [[MOPUBAVPlayer alloc] initWithDelegate:self playerItem:self.playerItem];
         self.avPlayer.muted = YES;
-
+        
+        if (@available(iOS 10.0, *)) {
+            self.avPlayer.automaticallyWaitsToMinimizeStalling = NO;
+        }
+        
         [self.playerView setAvPlayer:self.avPlayer];
     }
 }
