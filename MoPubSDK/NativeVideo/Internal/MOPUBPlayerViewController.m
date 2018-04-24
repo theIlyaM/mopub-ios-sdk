@@ -648,11 +648,16 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
     
     NSArray *requestedKeys = @[kTracksKey, kPlayableKey];
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginDownloadingVideo
+                                                        object:self
+                                                      userInfo:@{kMopubMediaUrl : self.mediaURL}];
+    
     __weak __typeof(self) weakSelf = self;
     [[IFMOPUBContentProvider instance] assetForUrl:self.mediaURL completion:^(AVURLAsset * _Nonnull asset) {
         __typeof__(self) strongSelf = weakSelf;
-        [strongSelf prepareToPlayAsset:asset withKeys:requestedKeys];
-        
+        if (!strongSelf.disposed) {
+            [strongSelf prepareToPlayAsset:asset withKeys:requestedKeys];
+        }
         MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:strongSelf.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);        
     }];
 }
