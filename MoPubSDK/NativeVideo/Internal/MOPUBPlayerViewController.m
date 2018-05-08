@@ -646,6 +646,11 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)loadAndPlayVideoUsingCache {
     self.startedLoading = YES;
     
+    if (!self.mediaURL) {
+        [self handleVideoInitError];
+        return;
+    }
+    
     NSArray *requestedKeys = @[kTracksKey, kPlayableKey];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginDownloadingVideo
