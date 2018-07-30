@@ -9,6 +9,9 @@
 
 #import <Foundation/Foundation.h>
 
+#define MOPUB_CONVERSION_DEFAULTS_KEY @"com.mopub.conversion"
+#define MOPUB_CONVERSION_APP_ID_KEY @"com.mopub.conversion.appId"
+
 /**
  * The `MPAdConversionTracker` class provides a mechanism for reporting application download
  * (conversion) events to MoPub. This type of tracking is important for measuring the effectiveness
@@ -23,7 +26,7 @@
  * events.
  */
 
-@interface MPAdConversionTracker : NSObject <NSURLConnectionDataDelegate>
+@interface MPAdConversionTracker : NSObject
 
 /** @name Recording Conversions */
 

@@ -16,4 +16,6 @@
 @property (nonatomic, strong) MPBannerCustomEvent *bannerCustomEvent;
 @property (nonatomic, strong) MPAdConfiguration *configuration;
 
+- (instancetype)initWithConfiguration:(MPAdConfiguration *)configuration delegate:(id<MPBannerAdapterDelegate>)delegate;
+
 @end

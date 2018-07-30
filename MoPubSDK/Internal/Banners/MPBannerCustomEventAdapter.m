@@ -9,7 +9,7 @@
 
 #import "MPAdConfiguration.h"
 #import "MPBannerCustomEvent.h"
-#import "MPInstanceProvider.h"
+#import "MPCoreInstanceProvider.h"
 #import "MPLogging.h"
 #import "MPAdImpressionTimer.h"
 #import "MPBannerCustomEvent+Internal.h"
@@ -26,8 +26,14 @@
 @end
 
 @implementation MPBannerCustomEventAdapter
-@synthesize hasTrackedImpression = _hasTrackedImpression;
-@synthesize hasTrackedClick = _hasTrackedClick;
+
+- (instancetype)initWithConfiguration:(MPAdConfiguration *)configuration delegate:(id<MPBannerAdapterDelegate>)delegate
+{
+    if (!configuration.customEventClass) {
+        return nil;
+    }
+    return [self initWithDelegate:delegate];
+}
 
 - (void)unregisterDelegate
 {
@@ -51,13 +57,17 @@
     MPLogInfo(@"Looking for custom event class named %@.", configuration.customEventClass);
     self.configuration = configuration;
 
-    self.bannerCustomEvent = [[MPInstanceProvider sharedProvider] buildBannerCustomEventFromCustomClass:configuration.customEventClass
-                                                                                               delegate:self];
-    if (self.bannerCustomEvent) {
-        [self.bannerCustomEvent requestAdWithSize:size customEventInfo:configuration.customEventClassData];
-    } else {
+    MPBannerCustomEvent *customEvent = [[configuration.customEventClass alloc] init];
+    if (![customEvent isKindOfClass:[MPBannerCustomEvent class]]) {
+        MPLogError(@"**** Custom Event Class: %@ does not extend MPBannerCustomEvent ****", NSStringFromClass(configuration.customEventClass));
         [self.delegate adapter:self didFailToLoadAdWithError:nil];
+        return;
     }
+
+
+    self.bannerCustomEvent = customEvent;
+    self.bannerCustomEvent.delegate = self;
+    [self.bannerCustomEvent requestAdWithSize:size customEventInfo:configuration.customEventClassData adMarkup:configuration.advancedBidPayload];
 }
 
 - (void)rotateToOrientation:(UIInterfaceOrientation)newOrientation
@@ -181,6 +191,9 @@
     [self.bannerCustomEvent trackMPXAndThirdPartyImpressions];
     // Start viewability tracking
     [self.bannerCustomEvent startViewabilityTracker];
+
+    // Notify delegate that an impression tracker was fired
+    [self.delegate adapter:self didTrackImpressionForAd:adView];
 }
 
 @end

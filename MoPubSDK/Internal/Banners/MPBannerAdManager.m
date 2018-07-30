@@ -7,7 +7,6 @@
 
 #import "MPBannerAdManager.h"
 #import "MPAdServerURLBuilder.h"
-#import "MPInstanceProvider.h"
 #import "MPCoreInstanceProvider.h"
 #import "MPBannerAdManagerDelegate.h"
 #import "MPError.h"
@@ -15,6 +14,7 @@
 #import "MPConstants.h"
 #import "MPLogging.h"
 #import "MPBannerCustomEvent.h"
+#import "MPBannerCustomEventAdapter.h"
 
 @interface MPBannerAdManager ()
 
@@ -54,7 +54,7 @@
     if (self) {
         self.delegate = delegate;
 
-        self.communicator = [[MPCoreInstanceProvider sharedProvider] buildMPAdServerCommunicatorWithDelegate:self];
+        self.communicator = [[MPAdServerCommunicator alloc] initWithDelegate:self];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationWillEnterForeground)
@@ -162,8 +162,8 @@
 
     URL = (URL) ? URL : [MPAdServerURLBuilder URLWithAdUnitID:[self.delegate adUnitId]
                                                      keywords:[self.delegate keywords]
-                                                     location:[self.delegate location]
-                                                      testing:[self.delegate isTesting]];
+                                             userDataKeywords:[self.delegate userDataKeywords]
+                                                     location:[self.delegate location]];
 
     MPLogInfo(@"Banner view (%@) loading ad with MoPub server URL: %@", [self.delegate adUnitId], URL);
 
@@ -201,45 +201,51 @@
     }
 }
 
+- (BOOL)shouldScheduleTimerOnImpressionDisplay {
+    // If `visibleImpressionTrackingEnabled` is set to `YES`, we
+    // should schedule the timer only after the impression has fired.
+    return self.requestingConfiguration.visibleImpressionTrackingEnabled;
+}
+
 #pragma mark - <MPAdServerCommunicatorDelegate>
 
-- (void)communicatorDidReceiveAdConfiguration:(MPAdConfiguration *)configuration
+- (void)communicatorDidReceiveAdConfigurations:(NSArray<MPAdConfiguration *> *)configurations
 {
-    self.requestingConfiguration = configuration;
+    self.requestingConfiguration = configurations.firstObject;
 
     MPLogInfo(@"Banner ad view is fetching ad network type: %@", self.requestingConfiguration.networkType);
 
-    if (configuration.adType == MPAdTypeUnknown) {
+    if (self.requestingConfiguration.adType == MPAdTypeUnknown) {
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorServerError]];
         return;
     }
 
-    if (configuration.adType == MPAdTypeInterstitial) {
+    if (self.requestingConfiguration.adType == MPAdTypeInterstitial) {
         MPLogWarn(@"Could not load ad: banner object received an interstitial ad unit ID.");
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorAdapterInvalid]];
         return;
     }
 
-    if (configuration.adUnitWarmingUp) {
+    if (self.requestingConfiguration.adUnitWarmingUp) {
         MPLogInfo(kMPWarmingUpErrorLogFormatWithAdUnitID, self.delegate.adUnitId);
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorAdUnitWarmingUp]];
         return;
     }
 
-    if ([configuration.networkType isEqualToString:kAdTypeClear]) {
+    if ([self.requestingConfiguration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.delegate.adUnitId);
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorNoInventory]];
         return;
     }
 
-    self.requestingAdapter = [[MPInstanceProvider sharedProvider] buildBannerAdapterForConfiguration:configuration
-                                                                                            delegate:self];
+    self.requestingAdapter = [[MPBannerCustomEventAdapter alloc] initWithConfiguration:self.requestingConfiguration
+                                                                              delegate:self];
     if (!self.requestingAdapter) {
         [self loadAdWithURL:self.requestingConfiguration.failoverURL];
         return;
     }
 
-    [self.requestingAdapter _getAdWithConfiguration:configuration containerSize:self.delegate.containerSize];
+    [self.requestingAdapter _getAdWithConfiguration:self.requestingConfiguration containerSize:self.delegate.containerSize];
 }
 
 - (void)communicatorDidFailWithError:(NSError *)error
@@ -251,13 +257,7 @@
 {
     [self.delegate managerDidFailToLoadAdWithError:error];
 	
-	NSObject *viewDelegate = [(NSObject *)self.delegate valueForKey:@"_delegate"];
-	if (![viewDelegate isKindOfClass:[MPBannerCustomEvent class]]) {
-		NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-		[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
-				@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
-				  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
-	}
+	[self if_logFailedAttemptWithError:error loadingBeganTime:loadingBeganTime];
 	
     [self scheduleRefreshTimer];
 
@@ -306,17 +306,15 @@
         [self.onscreenAdapter rotateToOrientation:self.currentOrientation];
         [self.delegate managerDidLoadAd:self.requestingAdapterAdContentView];
 		
-		NSObject *viewDelegate = [(NSObject *)self.delegate valueForKey:@"_delegate"];
-		if (![viewDelegate isKindOfClass:[MPBannerCustomEvent class]]) {
-			NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-			[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptSuccessNotification object:
-					@{adNotificationParamsTime:[NSNumber numberWithDouble:time]}];
-		}
+		[self if_logSuccessAttemptWithLoadingBeganTime:loadingBeganTime];
 		
         [self.onscreenAdapter didDisplayAd];
 
         self.requestingAdapterAdContentView = nil;
-        [self scheduleRefreshTimer];
+
+        if (![self shouldScheduleTimerOnImpressionDisplay]) {
+            [self scheduleRefreshTimer];
+        }
     }
 }
 
@@ -341,13 +339,7 @@
         // 3) and note that there can't possibly be a modal on display any more
         [self.delegate managerDidFailToLoadAdWithError:error];
 		
-		NSObject *viewDelegate = [(NSObject *)self.delegate valueForKey:@"_delegate"];
-		if (![viewDelegate isKindOfClass:[MPBannerCustomEvent class]]) {
-			NSTimeInterval time = [[NSDate date] timeIntervalSince1970] - loadingBeganTime;
-			[[NSNotificationCenter defaultCenter] postNotificationName:bannerAdAttemptFailedNotification object:
-				@{adNotificationParamsTime:[NSNumber numberWithDouble:time],
-				  adNotificationParamsErrorCode:[NSNumber numberWithInteger:error.code]}];
-		}
+		[self if_logFailedAttemptWithError:error loadingBeganTime:loadingBeganTime];
 		
         [self.delegate invalidateContentView];
         [self.onscreenAdapter unregisterDelegate];
@@ -361,6 +353,12 @@
         } else {
             [self loadAd];
         }
+    }
+}
+
+- (void)adapter:(MPBaseBannerAdapter *)adapter didTrackImpressionForAd:(UIView *)ad {
+    if (self.onscreenAdapter == adapter && [self shouldScheduleTimerOnImpressionDisplay]) {
+        [self scheduleRefreshTimer];
     }
 }
 
